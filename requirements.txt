@@ -1,0 +1,7 @@
+Flask
+Flask-Session
+SQLAlchemy
+alembic
+pytz
+requests
+Werkzeug

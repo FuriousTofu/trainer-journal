@@ -1,5 +1,18 @@
+# Python cache
 __pycache__/
-.vscode/
-.env
 *.pyc
 
+# VS Code settings
+.vscode/
+
+# Virtual environment
+.venv/
+
+# Flask session files
+flask_session/
+
+# Databases, secrets
+*.db
+*.sqlite
+instance/
+.env
