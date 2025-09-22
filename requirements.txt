@@ -1,7 +1,9 @@
 Flask
 Flask-Session
+Flask-SQLAlchemy
 SQLAlchemy
 alembic
 pytz
 requests
 Werkzeug
+flake8
