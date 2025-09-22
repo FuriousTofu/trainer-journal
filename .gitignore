@@ -14,5 +14,4 @@ flask_session/
 # Databases, secrets
 *.db
 *.sqlite
-instance/
 .env
