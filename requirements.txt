@@ -1,9 +1,10 @@
 Flask
 Flask-Session
 Flask-SQLAlchemy
+Flask-WTF
 SQLAlchemy
 alembic
-pytz
+pytz # for timezone handling
 requests
 Werkzeug
-flake8
+flake8 # for code linting
