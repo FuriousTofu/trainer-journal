@@ -1,5 +1,5 @@
 Flask
-Flask-Session
+Flask-Login
 Flask-SQLAlchemy
 Flask-WTF
 SQLAlchemy
