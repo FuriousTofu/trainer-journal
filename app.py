@@ -13,6 +13,5 @@ def create_app():
 
     from routes import bp as main_bp
     app.register_blueprint(main_bp)
-    with app.app_context():
-        print("DB path:", db.engine.url.database)
+
     return app
