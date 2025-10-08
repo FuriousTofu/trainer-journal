@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, ForeignKey, Boolean, CheckConstraint, UniqueConstraint, Index, Numeric, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
-from app import db
+from app import db, login_manager
+from flask_login import UserMixin
 
-class Trainer(db.Model):
+class Trainer(db.Model, UserMixin):
     """Represents a trainer - main user of the system."""
     
     __tablename__ = "trainers"
@@ -38,6 +39,13 @@ class Trainer(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True
     )
+
+@login_manager.user_loader
+def load_user(user_id):
+    try:
+        return db.session.get(Trainer, int(user_id))
+    except (ValueError, TypeError):
+        return None
 
 class Client(db.Model):
     """Represents a client - no own login, all data operated an added by the trainer"""
