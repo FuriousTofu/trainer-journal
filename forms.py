@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm 
-from wtforms import StringField, EmailField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, EmailField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, Regexp
 
 class RegisterForm(FlaskForm):
@@ -64,7 +64,7 @@ class AddExerciseForm(FlaskForm):
             Length(max=90, message="Exercise name must be at most 90 characters long.")
         ]
     )
-    description = StringField(
+    description = TextAreaField(
         "Description (Optional)",
         validators=[
             Length(max=1024, message="Description must be at most 1024 characters long.")
