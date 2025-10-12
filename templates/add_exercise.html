@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Exercise
+{% endblock %}
+
+{% block main %}
+    <h1 class="h2">Add New Exercise</h1>
+    <form method="post" action="{{ url_for('.add_exercise') }}" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="mb-2">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control", placeholder="Exercise Name") }}
+            {% for error in form.name.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="mb-2">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", placeholder="Exercise Description", rows="4") }}
+            {% for error in form.description.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="mb-2">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+{% endblock %}

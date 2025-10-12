@@ -55,3 +55,19 @@ class LoginForm(FlaskForm):
     )
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class AddExerciseForm(FlaskForm):
+    name = StringField(
+        "Exercise Name",
+        validators=[
+            DataRequired(message="Exercise name is required."),
+            Length(max=90, message="Exercise name must be at most 90 characters long.")
+        ]
+    )
+    description = StringField(
+        "Description (Optional)",
+        validators=[
+            Length(max=1024, message="Description must be at most 1024 characters long.")
+        ]
+    )
+    submit = SubmitField("Add Exercise")

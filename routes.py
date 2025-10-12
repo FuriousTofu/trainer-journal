@@ -6,17 +6,47 @@ from sqlalchemy import select
 
 from app import db
 from models import Trainer, Client, Session, Exercise, SessionExercise
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, AddExerciseForm
 
 bp = Blueprint("main", __name__)
 
 @bp.route("/")
+@login_required
 def index():
     return render_template("main.html")
 
+@bp.route("/sessions")
+@login_required
+def sessions():
+    return "Тут буде список сесій"
+
 @bp.route("/clients")
+@login_required
 def clients():
     return "Тут буде список клієнтів"
+
+@bp.route("/exercises")
+@login_required
+def exercises():
+    return "Тут буде список вправ"
+
+@bp.route("/exercises/add", methods=["GET", "POST"])
+@login_required
+def add_exercise():
+    form = AddExerciseForm()
+    if form.validate_on_submit():
+        name = form.name.data.strip()
+        description = form.description.data.strip() if form.description.data else None
+        new_exercise = Exercise(name=name, description=description, trainer_id=current_user.id)
+        try:
+            db.session.add(new_exercise)
+            db.session.commit()
+            flash("Exercise added successfully", "success")
+            return redirect(url_for(".add_exercise"))
+        except IntegrityError:
+            db.session.rollback()
+            form.name.errors.append("An exercise with this name already exists.")
+    return render_template("add_exercise.html", form=form)
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
