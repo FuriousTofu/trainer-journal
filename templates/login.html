@@ -8,21 +8,21 @@
         <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
         <div class="form-floating mb-2">
-            {{ form.email(class="form-control", id="email", placeholder="Email", autocomplete="email") }}
+            {{ form.email(class="form-control", placeholder="Email", autocomplete="email") }}
             {{ form.email.label(class="form-label") }}
             {% for error in form.email.errors %}
                 <div class="text-danger small">{{ error }}</div>
             {% endfor %}
         </div>
 
-        <div class="form-floating mb-2">
-            {{ form.password(class="form-control", id="password", placeholder="Password", autocomplete="current-password") }}
+        <div class="form-floating">
+            {{ form.password(class="form-control", placeholder="Password", autocomplete="current-password") }}
             {{ form.password.label(class="form-label") }}
             {% for error in form.password.errors %}
                 <div class="text-danger small">{{ error }}</div>
             {% endfor %}
         </div>
-        <div class="form-check mb-2">
+        <div class="form-check mt-1">
             {{ form.remember_me(class="form-check-input") }}
             {{ form.remember_me.label(class="form-check-label") }}
         </div>

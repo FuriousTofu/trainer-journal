@@ -12,24 +12,6 @@ body {
   z-index: 2;
 }
 
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.form-signin input[type="password2"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
 .auth-link {
   color: #6c757d;
   font-size: 0.9rem;
@@ -39,4 +21,9 @@ body {
 .auth-link:hover {
   color: #343a40;
   text-decoration: underline;
+}
+
+.form-floating textarea.form-control {
+  height: auto;
+  min-height: 120px;
 }

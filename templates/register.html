@@ -8,7 +8,7 @@
         <h1 class="h3 mb-3 fw-normal">Create account</h1>
 
         <div class="form-floating mb-2">
-            {{ form.username(class="form-control", id="username", placeholder="Username", autocomplete="username") }}
+            {{ form.username(class="form-control", placeholder="Username", autocomplete="username") }}
             {{ form.username.label(class="form-label") }}
             {% for error in form.username.errors %}
                 <div class="text-danger small">{{ error }}</div>
@@ -16,7 +16,7 @@
         </div>
 
         <div class="form-floating mb-2">
-            {{ form.email(class="form-control", id="email", placeholder="Email", autocomplete="email") }}
+            {{ form.email(class="form-control", placeholder="Email", autocomplete="email") }}
             {{ form.email.label(class="form-label") }}
             {% for error in form.email.errors %}
                 <div class="text-danger small">{{ error }}</div>
@@ -24,7 +24,7 @@
         </div>
 
         <div class="form-floating mb-2">
-            {{ form.password(class="form-control", id="password", placeholder="Password", autocomplete="new-password") }}
+            {{ form.password(class="form-control", placeholder="Password", autocomplete="new-password") }}
             {{ form.password.label(class="form-label") }}
             {% for error in form.password.errors %}
                 <div class="text-danger small">{{ error }}</div>
@@ -32,7 +32,7 @@
         </div>
 
         <div class="form-floating mb-2">
-            {{ form.password2(class="form-control", id="password2", placeholder="Confirm password", autocomplete="new-password") }}
+            {{ form.password2(class="form-control", placeholder="Confirm password", autocomplete="new-password") }}
             {{ form.password2.label(class="form-label") }}
             {% for error in form.password2.errors %}
                 <div class="text-danger small">{{ error }}</div>
