@@ -25,10 +25,12 @@ def sessions():
 def clients():
     return "Тут буде список клієнтів"
 
-@bp.route("/exercises")
+@bp.route("/exercises", methods=["GET", "POST"])
 @login_required
 def exercises():
-    return "Тут буде список вправ"
+    stmt = select(Exercise).where(Exercise.trainer_id == current_user.id)
+    exercises = db.session.execute(stmt).scalars().all()
+    return render_template("exercises.html", exercises=exercises)
 
 @bp.route("/exercises/add", methods=["GET", "POST"])
 @login_required
