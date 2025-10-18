@@ -6,6 +6,7 @@ login_manager = LoginManager()
 login_manager.login_view = "main.login"
 db = SQLAlchemy()
 
+
 # https://flask.palletsprojects.com/en/stable/patterns/appfactories/
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -17,5 +18,5 @@ def create_app():
 
     from routes import bp as main_bp
     app.register_blueprint(main_bp)
-    
+
     return app
