@@ -1,4 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, ForeignKey, Boolean, CheckConstraint, UniqueConstraint, Index, Numeric, text
+from sqlalchemy import (
+    Column, Integer, String, Text, DateTime, 
+    Enum, ForeignKey, Boolean, CheckConstraint, 
+    UniqueConstraint, Index, Numeric, text,
+)
+from nanoid import generate
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 from app import db, login_manager
@@ -52,6 +57,12 @@ class Client(db.Model):
 
     __tablename__ = "clients"
     id = Column(Integer, primary_key=True)
+    public_id = Column(
+        String(12),
+        nullable=False,
+        unique=True,
+        default=lambda: generate(size=12),
+    )
     trainer_id = Column(
         Integer, 
         ForeignKey("trainers.id", ondelete="CASCADE"), 
