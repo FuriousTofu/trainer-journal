@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from app import db
 from models import Trainer, Client, Session, Exercise, SessionExercise
-from forms import RegisterForm, LoginForm, AddExerciseForm
+from forms import RegisterForm, LoginForm, AddExerciseForm, AddClientForm
 
 bp = Blueprint("main", __name__)
 
@@ -20,10 +20,40 @@ def index():
 def sessions():
     return "Тут буде список сесій"
 
-@bp.route("/clients")
+@bp.route("/clients", methods=["GET", "POST"])
 @login_required
 def clients():
     return "Тут буде список клієнтів"
+
+@bp.route("/clients/add", methods=["GET", "POST"])
+@login_required
+def add_client():
+    form = AddClientForm()
+    if form.validate_on_submit():
+        name = form.name.data.strip()
+        price = form.price.data
+        contact = form.contact.data.strip() if form.contact.data else None
+        notes = form.notes.data.strip() if form.notes.data else None
+        status = form.status.data
+        new_client = Client(
+            name=name,
+            price=price,
+            contact=contact,
+            notes=notes,
+            status=status,
+            trainer_id=current_user.id
+        )
+        db.session.add(new_client)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            form.name.errors.append("A client with this name already exists.")
+        
+        flash("Client added successfully", "success")
+        return redirect(url_for(".clients"))
+    
+    return render_template("add_client.html", form=form)
 
 @bp.route("/exercises", methods=["GET", "POST"])
 @login_required
