@@ -11,7 +11,7 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config["SECRET_KEY"] = "so_secret_wery_key"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///trainer.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{app.instance_path}/trainer.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
     login_manager.init_app(app)
