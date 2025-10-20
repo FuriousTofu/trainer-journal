@@ -6,38 +6,47 @@
 
 {% block main %}
     <h2 class="h2">Add New Client</h2>
-    <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary mb-3">
-        <i class="bi bi-arrow-return-left"></i> Get Back
-    </a>
-    <form method="post" action="{{ url_for('.add_client') }}" novalidate>
+    <form method="post" action="{{ url_for('.add_client') }}" novalidate class="add-form">
         {{ form.hidden_tag() }}
-        <div class="form-floating mb-2">
-            {{ form.name(class="form-control", placeholder="Client Name") }}
-            {{ form.name.label(class="form-label") }}
-            {% for error in form.name.errors %}
-                <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
+        <div class="row g-2 mb-2">
+            <div class="col-md-6">
+                <div class="form-floating mb-2">
+                    {{ form.name(class="form-control", placeholder="Client Name") }}
+                    {{ form.name.label(class="form-label") }}
+                    {% for error in form.name.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating mb-2">
+                    {{ form.status(class="form-select", placeholder="Client Status") }}
+                    {{ form.status.label(class="form-label") }}
+                    {% for error in form.status.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        <div class="form-floating mb-2">
-            {{ form.price(class="form-control", placeholder="Session Price") }}
-            {{ form.price.label(class="form-label") }}
-            {% for error in form.price.errors %}
-                <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-floating mb-2">
-            {{ form.status(class="form-select", placeholder="Client Status") }}
-            {{ form.status.label(class="form-label") }}
-            {% for error in form.status.errors %}
-                <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="form-floating mb-2">
-            {{ form.contact(class="form-control", placeholder="Contact Information (Optional)") }}
-            {{ form.contact.label(class="form-label") }}
-            {% for error in form.contact.errors %}
-                <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
+        <div class="row g-2 mb-2">
+            <div class="col-md-6">
+                <div class="form-floating mb-2">
+                    {{ form.price(class="form-control", placeholder="Session Price") }}
+                    {{ form.price.label(class="form-label") }}
+                    {% for error in form.price.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating mb-2">
+                    {{ form.contact(class="form-control", placeholder="Contact Information (Optional)") }}
+                    {{ form.contact.label(class="form-label") }}
+                    {% for error in form.contact.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         <div class="form-floating mb-2">
             {{ form.notes(class="form-control", placeholder="Notes (Optional)") }}
@@ -45,8 +54,12 @@
             {% for error in form.notes.errors %}
                 <div class="text-danger small">{{ error }}</div>
             {% endfor %}
-        <div class="mb-2">
-            </i>{{ form.submit(class="btn btn-primary") }}
+        </div>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-return-left"></i> Get Back
+            </a>
+            {{ form.submit(class="btn btn-primary") }}
         </div>
     </form>
 {% endblock %}

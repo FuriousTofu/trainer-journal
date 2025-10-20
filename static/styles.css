@@ -8,6 +8,12 @@ body {
   padding: 1rem;
 }
 
+.add-form{
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
 .form-signin .form-floating:focus-within {
   z-index: 2;
 }
