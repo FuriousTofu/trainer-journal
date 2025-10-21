@@ -42,14 +42,14 @@
                    style="width: 4.5rem; position: sticky; top: 0;">
                 <a  href="/"
                     class="d-block p-3 link-body-emphasis text-decoration-none">
-                    <i class="bi bi-leaf-fill" style="font-size:2rem;" aria-hidden="true"></i>
+                    <i class="bi bi-leaf-fill {% if request.endpoint == 'main.index' %}text-success{% endif %}" style="font-size:2rem;" aria-hidden="true"></i>
                     <span class="visually-hidden">TrainerJournal</span>
                 </a>
                 <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
                     <li class="nav-item">
                         <a
                             href="{{ url_for('.sessions') }}"
-                            class="nav-link active py-3 border-bottom rounded-0"
+                            class="nav-link {% if '/sessions' in request.path %}active{% endif %} py-3 border-bottom rounded-0"
                             aria-current="page"
                             title="Sessions"
                             data-bs-toggle="tooltip"
@@ -60,7 +60,7 @@
                     <li>
                         <a
                             href="{{ url_for('.clients') }}"
-                            class="nav-link py-3 border-bottom rounded-0"
+                            class="nav-link {% if '/clients' in request.path %}active{% endif %} py-3 border-bottom rounded-0"
                             title="Clients"
                             data-bs-toggle="tooltip"
                             data-bs-placement="right">
@@ -70,7 +70,7 @@
                     <li>
                         <a
                             href="{{ url_for('.exercises') }}"
-                            class="nav-link py-3 border-bottom rounded-0"
+                            class="nav-link {% if '/exercises' in request.path %}active{% endif %} py-3 border-bottom rounded-0"
                             title="Exercises"
                             data-bs-toggle="tooltip"
                             data-bs-placement="right">
