@@ -42,7 +42,7 @@
                    style="width: 4.5rem; position: sticky; top: 0;">
                 <a  href="/"
                     class="d-block p-3 link-body-emphasis text-decoration-none">
-                    <i class="bi bi-leaf-fill {% if request.endpoint == 'main.index' %}text-success{% endif %}" style="font-size:2rem;" aria-hidden="true"></i>
+                    <i class="bi bi-leaf-fill {% if request.path == '/' %}text-success{% endif %}" style="font-size:2rem;" aria-hidden="true"></i>
                     <span class="visually-hidden">TrainerJournal</span>
                 </a>
                 <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
