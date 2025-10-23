@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}Clients{% endblock %}
+
+{% block main %}
+<h2>Your clients list</h2>
+<a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
+    <i class="bi bi-plus-circle"></i> Add Client
+</a>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th class="text-start">Name</th>
+            <th class="text-end">Contact</th>
+            <th class="text-end">Price</th>
+            <th class="text-end">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for client in clients %}
+            <tr 
+                {% if client.notes %}
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="{{ client.notes }}"
+                {% endif %}>
+                <td class="text-start">{{ client.name }}</td>
+                <td class="text-end">{{ client.contact }}</td>
+                <td class="text-end">{{ client.price}}</td>
+                <td class="text-end">{{ client.status }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

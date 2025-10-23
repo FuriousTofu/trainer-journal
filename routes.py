@@ -23,7 +23,9 @@ def sessions():
 @bp.route("/clients", methods=["GET", "POST"])
 @login_required
 def clients():
-    return "Тут буде список клієнтів"
+    stmt = select(Client).where(Client.trainer_id == current_user.id)
+    clients = db.session.execute(stmt).scalars().all()
+    return render_template("clients.html", clients=clients)
 
 @bp.route("/clients/add", methods=["GET", "POST"])
 @login_required
