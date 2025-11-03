@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block title %}Sessions{% endblock %}
+
+{% block main %}
+<h2>Your sessions list</h2>
+<a href="{{ url_for('.add_session') }}" class="btn btn-outline-primary mb-3">
+    <i class="bi bi-plus-circle"></i> Add Session
+</a>
+{% endblock%}
