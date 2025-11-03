@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Session
+{% endblock %}
+
+{% block main %}
+    <h2 class="h2">Add New Session</h2>
+    <form method="post" action="{{ url_for('.add_session') }}" novalidate class="add-form">
+        {{ form.hidden_tag() }}
+        <div class="row g-2 mb-2">
+            <div class="col-md-6">
+                <div class="form-floating mb-2">
+                    {{ form.client(
+                        class="form-select", 
+                        placeholder="Select Client"
+                    ) }}
+                    {{ form.client.label(class="form-label") }}
+                    {% for error in form.client.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating mb-2">
+                    {{ form.start_dt(
+                        class="form-control",
+                        type="datetime-local",
+                        placeholder="Start Date and Time"
+                    ) }}
+                    {{ form.start_dt.label(class="form-label") }}
+                    {% for error in form.start_dt.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-md-4">
+                <div class="form-floating mb-2">
+                    {{ form.duration_min(class="form-control", placeholder="Duration (minutes)") }}
+                    {{ form.duration_min.label(class="form-label") }}
+                    {% for error in form.duration_min.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-floating mb-2">
+                    {{ form.mode(
+                        class="form-select",
+                        placeholder="Session Mode"
+                    ) }}
+                    {{ form.mode.label(class="form-label") }}
+                    {% for error in form.mode.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div> 
+            </div>
+            <div class="col-md-4">
+                <div id="price-wrapper">
+                    <div class="form-floating mb-2">
+                        {{ form.price(class="form-control", placeholder="Session Price") }}
+                        {{ form.price.label(class="form-label") }}
+                        {% for error in form.price.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="exercise-wrapper">
+            {% for subform in form.exercises %}
+                <div class="row g-2 mb-2">
+                    <div class ="col-md-3">
+                        <div class="form-floating">
+                            {{ subform.exercise(
+                                class="form-select", 
+                                placeholder="Select Exercise"
+                            ) }}
+                            {{ subform.exercise.label(class="form-label") }}
+                            {% for error in subform.exercise.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class ="col-md-3">
+                        <div class="form-floating">
+                            {{ subform.sets(
+                                class="form-control", 
+                                placeholder="Sets"
+                            ) }}
+                            {{ subform.sets.label(class="form-label") }}
+                            {% for error in subform.sets.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class ="col-md-3">
+                        <div class="form-floating">
+                            {{ subform.reps(
+                                class="form-control", 
+                                placeholder="Reps"
+                            ) }}
+                            {{ subform.reps.label(class="form-label") }}
+                            {% for error in subform.reps.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class ="col-md-3">
+                        <div class="form-floating">
+                            {{ subform.weight(
+                                class="form-control", 
+                                placeholder="Weight"
+                            ) }}
+                            {{ subform.weight.label(class="form-label") }}
+                            {% for error in subform.weight.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="form-floating mb-2">
+            {{ form.notes(
+                class="form-control", 
+                placeholder="Session Notes (Optional)"
+            ) }}
+            {{ form.notes.label(class="form-label") }}
+            {% for error in form.notes.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <a href="{{ url_for('.sessions') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-return-left"></i> Get Back
+            </a>
+            {{ form.submit(class="btn btn-primary px-3") }}
+        </div>
+    </form>
+{% endblock %}
