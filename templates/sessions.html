@@ -7,4 +7,26 @@
 <a href="{{ url_for('.add_session') }}" class="btn btn-outline-primary mb-3">
     <i class="bi bi-plus-circle"></i> Add Session
 </a>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th class="text-start">Start</th>
+            <th class="text-end">Client</th>
+            <th class="text-end">Mode</th>
+            <th class="text-end">Status</th>
+            <th class="text-end">Payment</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for session in sessions %}
+            <tr>
+                <td class="text-start">{{ session.start_dt }}</td>
+                <td class="text-end">{{ session.client.name }}</td>
+                <td class="text-end">{{ session.mode }}</td>
+                <td class="text-end">{{ session.status }}</td>
+                <td class="text-end">{{ session.is_paid }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock%}

@@ -21,7 +21,9 @@ def index():
 @bp.route("/sessions", methods=["GET", "POST"])
 @login_required
 def sessions():
-    return render_template("sessions.html")
+    stmt = select(Session).where(Session.client.has(trainer_id=current_user.id)).order_by(Session.start_dt)
+    sessions = db.session.execute(stmt).scalars().all()
+    return render_template("sessions.html", sessions=sessions)
 
 @bp.route("/sessions/add", methods=["GET", "POST"])
 @login_required
