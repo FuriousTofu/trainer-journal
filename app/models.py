@@ -1,6 +1,6 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, DateTime, 
-    Enum, ForeignKey, Boolean, CheckConstraint, 
+    Column, Integer, String, Text, DateTime,
+    Enum, ForeignKey, Boolean, CheckConstraint,
     UniqueConstraint, Index, Numeric, text,
 )
 from nanoid import generate
@@ -9,9 +9,10 @@ from sqlalchemy.sql import expression
 from app import db, login_manager
 from flask_login import UserMixin
 
+
 class Trainer(db.Model, UserMixin):
     """Represents a trainer - main user of the system."""
-    
+
     __tablename__ = "trainers"
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
@@ -20,7 +21,7 @@ class Trainer(db.Model, UserMixin):
 
     # For displaying sessions in calendars/exports
     timezone = Column(String(50), default="Europe/Kyiv", server_default="Europe/Kyiv")
-    
+
     # Default is UAH, extendable in the future
     currency = Column(
         Enum("UAH", "USD", "EUR", name="currency_enum"),
@@ -28,7 +29,7 @@ class Trainer(db.Model, UserMixin):
         default="UAH",
         server_default="UAH"
     )
-    
+
     # One-to-many: a trainer can have many clients
     clients = relationship(
         "Client",
@@ -45,12 +46,14 @@ class Trainer(db.Model, UserMixin):
         passive_deletes=True
     )
 
+
 @login_manager.user_loader
 def load_user(user_id):
     try:
         return db.session.get(Trainer, int(user_id))
     except (ValueError, TypeError):
         return None
+
 
 class Client(db.Model):
     """Represents a client - no own login, all data operated an added by the trainer"""
@@ -64,8 +67,8 @@ class Client(db.Model):
         default=lambda: generate(size=12),
     )
     trainer_id = Column(
-        Integer, 
-        ForeignKey("trainers.id", ondelete="CASCADE"), 
+        Integer,
+        ForeignKey("trainers.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
@@ -82,10 +85,10 @@ class Client(db.Model):
 
     # Many-to-one: each client can have only one trainer
     trainer = relationship("Trainer", back_populates="clients")
-    
+
     # One-to-many: delete all sessions if client deleted
     sessions = relationship(
-        "Session", 
+        "Session",
         back_populates="client",
         cascade="all, delete-orphan",
         passive_deletes=True
@@ -98,13 +101,14 @@ class Client(db.Model):
         CheckConstraint("price >= 0", name="ck_client_price_nonnegative"),
     )
 
+
 class Session(db.Model):
     """Represents a training session - schedule, result, payment status."""
 
     __tablename__ = "sessions"
     id = Column(Integer, primary_key=True)
     client_id = Column(
-        Integer, 
+        Integer,
         ForeignKey("clients.id", ondelete="CASCADE"),
         nullable=False,
         index=True
@@ -120,7 +124,7 @@ class Session(db.Model):
 
     # no_show - trainer has the right to charge a fee.
     status = Column(
-        Enum("planned","done","cancelled","no_show", name="session_status"),
+        Enum("planned", "done", "cancelled", "no_show", name="session_status"),
         nullable=False,
         default="planned",
         server_default="planned"
@@ -129,7 +133,12 @@ class Session(db.Model):
 
     # is_paid default False - on db level for any db type
     # Docs: https://docs.sqlalchemy.org/en/20/core/sqlelement.html
-    is_paid = Column(Boolean, nullable=False, default=False, server_default=expression.false())
+    is_paid = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=expression.false()
+    )
     payment_date = Column(DateTime(timezone=True))
     notes = Column(Text)
 
@@ -146,14 +155,15 @@ class Session(db.Model):
         passive_deletes=True
     )
 
+
 class Exercise(db.Model):
     """Represents an exercise - reusable, can be linked to multiple sessions."""
 
     __tablename__ = "exercises"
     id = Column(Integer, primary_key=True)
     trainer_id = Column(
-        Integer, 
-        ForeignKey("trainers.id", ondelete="CASCADE"), 
+        Integer,
+        ForeignKey("trainers.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
@@ -167,26 +177,27 @@ class Exercise(db.Model):
         UniqueConstraint('trainer_id', 'name', name='uq_exercise_name_per_trainer'),
     )
 
+
 class SessionExercise(db.Model):
     """Represents an exercise performed in a specific session with details."""
 
     __tablename__ = "session_exercises"
     id = Column(Integer, primary_key=True)
     session_id = Column(
-        Integer, 
-        ForeignKey("sessions.id", ondelete="CASCADE"), 
+        Integer,
+        ForeignKey("sessions.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
     exercise_id = Column(
-        Integer, 
-        ForeignKey("exercises.id", ondelete="RESTRICT"), 
+        Integer,
+        ForeignKey("exercises.id", ondelete="RESTRICT"),
         nullable=False,
         index=True
     )
     client_id = Column(
-        Integer, 
-        ForeignKey("clients.id", ondelete="CASCADE"), 
+        Integer,
+        ForeignKey("clients.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )

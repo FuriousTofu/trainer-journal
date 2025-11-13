@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 from app import create_app, db
-import models  # Ensure models are imported for Alembic to detect them
+import app.models as models # Ensure models are imported for Alembic to detect them
 
 app = create_app()
 app.app_context().push()

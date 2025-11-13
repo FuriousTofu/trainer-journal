@@ -10,33 +10,53 @@ from wtforms.validators import (
     EqualTo, Regexp, NumberRange,
 )
 
+
 class RegisterForm(FlaskForm):
     username = StringField(
         'Username',
         validators=[
             DataRequired(message="Username is required."),
-            Length(min=3, max=25, message="Username must be between 3 and 25 characters."),
-            Regexp('^[A-Za-z0-9._-]+$', message='Usernames must have only letters, digits, dot, underscore, dash.')
+            Length(
+                min=3,
+                max=25,
+                message="Username must be between 3 and 25 characters."
+            ),
+            Regexp(
+                '^[A-Za-z0-9._-]+$',
+                message=(
+                    'Usernames must have only letters, '
+                    'digits, dot, underscore, dash.'
+                )
+            )
         ]
     )
     email = EmailField(
-        'Email', 
+        'Email',
         validators=[
             DataRequired(message="Email is required."),
-            Length(max=120, message="Email must be at most 120 characters long."),
+            Length(
+                max=120,
+                message="Email must be at most 120 characters long."
+            ),
             Email(message="Invalid email address.")
         ]
     )
     password = PasswordField(
-        'Password', 
+        'Password',
         validators=[
             DataRequired(message="Password is required."),
-            Length(min=8, message="Password must be at least 8 characters long."),
-            Length(max=1024, message="Ma man, please stop trying to DoS attack me.")
+            Length(
+                min=8,
+                message="Password must be at least 8 characters long."
+            ),
+            Length(
+                max=1024,
+                message="Ma man, please stop trying to DoS attack me."
+            )
         ]
     )
     password2 = PasswordField(
-        'Confirm Password', 
+        'Confirm Password',
         validators=[
             DataRequired(message="Please confirm your password."),
             Length(max=1024, message="Nope, just don't."),
@@ -45,17 +65,21 @@ class RegisterForm(FlaskForm):
     )
     submit = SubmitField('Register')
 
+
 class LoginForm(FlaskForm):
     email = EmailField(
-        'Email', 
+        'Email',
         validators=[
             DataRequired(message="Email is required."),
-            Length(max=120, message="Email must be at most 120 characters long."),
+            Length(
+                max=120,
+                message="Email must be at most 120 characters long."
+            ),
             Email(message="Invalid email address.")
         ]
     )
     password = PasswordField(
-        'Password', 
+        'Password',
         validators=[
             DataRequired(message="Password is required."),
             Length(max=1024, message="That's too long, nope.")
@@ -64,28 +88,40 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
+
 class AddExerciseForm(FlaskForm):
     name = StringField(
         "Exercise Name",
         validators=[
             DataRequired(message="Exercise name is required."),
-            Length(max=90, message="Exercise name must be at most 90 characters long.")
+            Length(
+                max=90,
+                message="Exercise name must be at most 90 characters long."
+            )
         ]
     )
     description = TextAreaField(
         "Description (Optional)",
         validators=[
-            Length(max=1024, message="Description must be at most 1024 characters long.")
+            Length(
+                max=1024,
+                message="Description must be at most 1024 characters long."
+            )
         ]
     )
     submit = SubmitField("Add Exercise")
+
 
 class AddClientForm(FlaskForm):
     name = StringField(
         "Client Name",
         validators=[
             DataRequired(message="Client name is required."),
-            Length(min=3, max=100, message="Client name must be 3 to 100 characters long.")
+            Length(
+                min=3,
+                max=100,
+                message="Client name must be 3 to 100 characters long."
+            )
         ]
     )
     price = IntegerField(
@@ -97,9 +133,10 @@ class AddClientForm(FlaskForm):
     )
     status = SelectField(
         "Status",
-        choices=[('active', 'Active'),
-                 ('pause', 'On Pause'),
-                 ('archive', 'Archived')
+        choices=[
+            ('active', 'Active'),
+            ('pause', 'On Pause'),
+            ('archive', 'Archived')
         ],
         default='active',
         validators=[DataRequired(message="Status is required.")]
@@ -107,16 +144,23 @@ class AddClientForm(FlaskForm):
     contact = StringField(
         "Contact Information (Optional)",
         validators=[
-            Length(max=100, message="Contact information must be at most 100 characters long.")
+            Length(
+                max=100,
+                message="Contact must be at most 100 characters long."
+            )
         ]
     )
     notes = TextAreaField(
         "Notes (Optional)",
         validators=[
-            Length(max=4096, message="Notes must be at most 4096 characters long.")
+            Length(
+                max=4096,
+                message="Notes must be at most 4096 characters long."
+            )
         ]
     )
     submit = SubmitField("Add Client")
+
 
 class AddSessionExerciseForm(Form):
 
@@ -150,6 +194,7 @@ class AddSessionExerciseForm(Form):
         ]
     )
 
+
 class AddSessionForm(FlaskForm):
     client = SelectField(
         "Client",
@@ -169,13 +214,18 @@ class AddSessionForm(FlaskForm):
         default=60,
         validators=[
             DataRequired(message="Duration is required."),
-            NumberRange(min=1, max=480, message="Duration must be less than 480 minutes.")
+            NumberRange(
+                min=1,
+                max=480,
+                message="Duration must be less than 480 minutes."
+            )
         ]
     )
     mode = SelectField(
         "Session Mode",
-        choices=[('online', 'Online'),
-                 ('offline', 'Offline')
+        choices=[
+            ('online', 'Online'),
+            ('offline', 'Offline')
         ],
         default='offline',
         validators=[DataRequired(message="Session mode is required.")]
@@ -190,12 +240,24 @@ class AddSessionForm(FlaskForm):
     notes = TextAreaField(
         "Notes (Optional)",
         validators=[
-            Length(max=2048, message="Notes must be at most 2048 characters long.")
+            Length(
+                max=2048,
+                message="Notes must be at most 2048 characters long."
+            )
         ]
     )
 
-    exercises = FieldList(FormField(AddSessionExerciseForm), min_entries=0, max_entries=30)
+    exercises = FieldList(
+        FormField(AddSessionExerciseForm),
+        min_entries=0,
+        max_entries=30
+    )
     submit = SubmitField("Add Session")
 
-class AddSessionHelperFrom(Form):
-    exercises = FieldList(FormField(AddSessionExerciseForm), min_entries=0, max_entries=30)
+
+class AddSessionHelperForm(Form):
+    exercises = FieldList(
+        FormField(AddSessionExerciseForm),
+        min_entries=0,
+        max_entries=30
+    )
