@@ -18,3 +18,6 @@ flask_session/
 
 # MacOS files
 .DS_Store
+
+# Flake8 settings file
+.flake8
