@@ -196,3 +196,6 @@ class AddSessionForm(FlaskForm):
 
     exercises = FieldList(FormField(AddSessionExerciseForm), min_entries=0, max_entries=30)
     submit = SubmitField("Add Session")
+
+class AddSessionHelperFrom(Form):
+    exercises = FieldList(FormField(AddSessionExerciseForm), min_entries=0, max_entries=30)

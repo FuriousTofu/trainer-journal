@@ -8,7 +8,8 @@ from app import db
 from models import Trainer, Client, Session, Exercise, SessionExercise
 from forms import (
     RegisterForm, LoginForm, AddExerciseForm, 
-    AddClientForm, AddSessionForm, AddSessionExerciseForm
+    AddClientForm, AddSessionForm, AddSessionExerciseForm,
+    AddSessionHelperFrom
 )
 
 bp = Blueprint("main", __name__)
@@ -29,7 +30,6 @@ def sessions():
 @login_required
 def add_session():
     form = AddSessionForm()
-    form.exercises.append_entry()
 
     form.client.render_kw = {
         "hx-get": url_for(".client_price"),
@@ -110,7 +110,8 @@ def add_session():
                 ), 
                 "danger"
             )
-
+    
+    form.exercises.append_entry()
     return render_template("add_session.html", form=form)
 
 @bp.route("/sessions/add_exercise_row")
@@ -147,7 +148,7 @@ def remove_exercise_row():
         abort(400)
     
     orig_form = AddSessionForm(formdata=request.form)
-    new_form = AddSessionForm()
+    new_form = AddSessionHelperFrom()
     if not (0 <= remove_index < len(orig_form.exercises)):
         abort(400)
 
