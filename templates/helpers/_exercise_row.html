@@ -1,0 +1,63 @@
+{% set index = subform.name | replace('exercises-', '') %}
+<div class="row g-2 mb-2" data-index="{{ index }}">
+    <div class ="col-md-4">
+        <div class="form-floating">
+            {{ subform.exercise(
+                class="form-select", 
+                placeholder="Select Exercise"
+            ) }}
+            {{ subform.exercise.label(class="form-label") }}
+            {% for error in subform.exercise.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class ="col-md-2">
+        <div class="form-floating">
+            {{ subform.sets(
+                class="form-control", 
+                placeholder="Sets"
+            ) }}
+            {{ subform.sets.label(class="form-label") }}
+            {% for error in subform.sets.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class ="col-md-2">
+        <div class="form-floating">
+            {{ subform.reps(
+                class="form-control", 
+                placeholder="Reps"
+            ) }}
+            {{ subform.reps.label(class="form-label") }}
+            {% for error in subform.reps.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class ="col-md-3">
+        <div class="form-floating">
+            {{ subform.weight(
+                class="form-control", 
+                placeholder="Weight"
+            ) }}
+            {{ subform.weight.label(class="form-label") }}
+            {% for error in subform.weight.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-1 d-flex">
+        <button
+        type="button"
+        class="btn btn-outline-danger w-100 d-md-inline d-block mb-2 mb-md-0"
+        hx-post="{{ url_for('.remove_exercise_row') }}"
+        hx-target="#exercise-wrapper"
+        hx-include="#exercise-wrapper"
+        hx-vals='{"remove_index": "{{ index }}"}'
+        hx-swap="innerHTML">
+        <i class="bi bi-x"></i>
+        </button>
+    </div>
+</div>

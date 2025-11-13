@@ -6,7 +6,7 @@
 
 {% block main %}
     <h2 class="h2">Add New Session</h2>
-    <form method="post" action="{{ url_for('.add_session') }}" novalidate class="add-form">
+    <form method="post" action="{{ url_for('.add_session') }}" novalidate class="add-form" id="add-session-form">
         {{ form.hidden_tag() }}
         <div class="row g-2 mb-2">
             <div class="col-md-6">
@@ -71,56 +71,7 @@
         </div>
         <div id="exercise-wrapper">
             {% for subform in form.exercises %}
-                <div class="row g-2 mb-2">
-                    <div class ="col-md-3">
-                        <div class="form-floating">
-                            {{ subform.exercise(
-                                class="form-select", 
-                                placeholder="Select Exercise"
-                            ) }}
-                            {{ subform.exercise.label(class="form-label") }}
-                            {% for error in subform.exercise.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class ="col-md-3">
-                        <div class="form-floating">
-                            {{ subform.sets(
-                                class="form-control", 
-                                placeholder="Sets"
-                            ) }}
-                            {{ subform.sets.label(class="form-label") }}
-                            {% for error in subform.sets.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class ="col-md-3">
-                        <div class="form-floating">
-                            {{ subform.reps(
-                                class="form-control", 
-                                placeholder="Reps"
-                            ) }}
-                            {{ subform.reps.label(class="form-label") }}
-                            {% for error in subform.reps.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class ="col-md-3">
-                        <div class="form-floating">
-                            {{ subform.weight(
-                                class="form-control", 
-                                placeholder="Weight"
-                            ) }}
-                            {{ subform.weight.label(class="form-label") }}
-                            {% for error in subform.weight.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+                {% include "helpers/_exercise_row.html" %}
             {% endfor %}
         </div>
         <div class="form-floating mb-2">
@@ -137,6 +88,15 @@
             <a href="{{ url_for('.sessions') }}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-return-left"></i> Get Back
             </a>
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                hx-get="{{ url_for('.exercise_row') }}"
+                hx-target="#exercise-wrapper"
+                hx-include="#add-session-form"
+                hx-swap="beforeend">
+                + Add Exercise
+            </button>
             {{ form.submit(class="btn btn-primary px-3") }}
         </div>
     </form>

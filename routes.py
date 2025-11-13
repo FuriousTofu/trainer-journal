@@ -29,6 +29,7 @@ def sessions():
 @login_required
 def add_session():
     form = AddSessionForm()
+    form.exercises.append_entry()
 
     form.client.render_kw = {
         "hx-get": url_for(".client_price"),
@@ -111,6 +112,64 @@ def add_session():
             )
 
     return render_template("add_session.html", form=form)
+
+@bp.route("/sessions/add_exercise_row")
+@login_required
+def exercise_row():
+    if not request.headers.get("HX-Request"):
+        abort(404)
+    
+    form = AddSessionForm(formdata=request.args)
+    subform = form.exercises.append_entry()
+
+    exercises = db.session.execute(
+        select(Exercise.id, Exercise.name)
+        .where(Exercise.trainer_id == current_user.id)
+        .order_by(Exercise.name)
+    ).all()
+    exercise_choices = [(0, "Select Exercise")] + [(e.id, e.name) for e in exercises]
+    subform.exercise.choices = exercise_choices
+
+    return render_template("helpers/_exercise_row.html", subform=subform)
+
+@bp.route("/sessions/remove_exercise_row", methods=["POST"])
+@login_required
+def remove_exercise_row():
+    if not request.headers.get("HX-Request"):
+        abort(404)
+    
+    remove_index_raw = request.form.get("remove_index")
+    if remove_index_raw is None:
+        abort(400)
+    try:
+        remove_index = int(remove_index_raw)
+    except ValueError:
+        abort(400)
+    
+    orig_form = AddSessionForm(formdata=request.form)
+    new_form = AddSessionForm()
+    if not (0 <= remove_index < len(orig_form.exercises)):
+        abort(400)
+
+    for i, sub in enumerate(orig_form.exercises):
+        if i == remove_index:
+            continue
+        new_sub = new_form.exercises.append_entry()
+        new_sub.form.exercise.data = sub.form.exercise.data
+        new_sub.form.sets.data = sub.form.sets.data
+        new_sub.form.reps.data = sub.form.reps.data
+        new_sub.form.weight.data = sub.form.weight.data
+    
+    exercises = db.session.execute(
+        select(Exercise.id, Exercise.name)
+        .where(Exercise.trainer_id == current_user.id)
+        .order_by(Exercise.name)
+    ).all()
+    exercise_choices = [(0, "Select Exercise")] + [(e.id, e.name) for e in exercises]
+    for sub in new_form.exercises:
+        sub.form.exercise.choices = exercise_choices
+    
+    return render_template("helpers/_exercise_rows.html", form=new_form)
 
 @bp.route("/sessions/client-price")
 @login_required

@@ -3,7 +3,7 @@ from wtforms import (
     StringField, EmailField, PasswordField,
     SubmitField, BooleanField, TextAreaField,
     IntegerField, SelectField, DateTimeField,
-    FieldList, FormField,
+    FieldList, FormField, Form,
 )
 from wtforms.validators import (
     DataRequired, Email, Length,
@@ -118,9 +118,7 @@ class AddClientForm(FlaskForm):
     )
     submit = SubmitField("Add Client")
 
-class AddSessionExerciseForm(FlaskForm):
-    class Meta:
-        csrf = False
+class AddSessionExerciseForm(Form):
 
     exercise = SelectField(
         "Exercise",
@@ -138,14 +136,14 @@ class AddSessionExerciseForm(FlaskForm):
         ]
     )
     reps = IntegerField(
-        "Repetitions per Set",
+        "Repetitions",
         validators=[
             DataRequired(message="Number of repetitions is required."),
             NumberRange(min=1, message="There must be at least 1 repetition.")
         ]
     )
     weight = IntegerField(
-        "Weight (kg)",
+        "Weight",
         validators=[
             DataRequired(message="Weight is required."),
             NumberRange(min=0, message="Weight cannot be negative.")
@@ -196,5 +194,5 @@ class AddSessionForm(FlaskForm):
         ]
     )
 
-    exercises = FieldList(FormField(AddSessionExerciseForm), min_entries=3, max_entries=30)
+    exercises = FieldList(FormField(AddSessionExerciseForm), min_entries=0, max_entries=30)
     submit = SubmitField("Add Session")
