@@ -15,7 +15,7 @@ from . import bp
 def exercises():
     stmt = select(Exercise).where(Exercise.trainer_id == current_user.id)
     exercises = db.session.execute(stmt).scalars().all()
-    return render_template("exercises.html", exercises=exercises)
+    return render_template("exercises/exercises.html", exercises=exercises)
 
 
 @bp.route("/exercises/add", methods=["GET", "POST"])
@@ -46,4 +46,4 @@ def add_exercise():
                 "An exercise with this name already exists."
             )
 
-    return render_template("add_exercise.html", form=form)
+    return render_template("exercises/add_exercise.html", form=form)

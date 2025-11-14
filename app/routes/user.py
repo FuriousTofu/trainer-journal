@@ -19,7 +19,7 @@ from . import bp
 @bp.route("/")
 @login_required
 def index():
-    return render_template("main.html")
+    return render_template("user/main.html")
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -42,7 +42,7 @@ def login():
             return redirect(url_for(".index"))
         form.password.errors.append("Invalid email or password.")
 
-    return render_template("login.html", form=form)
+    return render_template("user/login.html", form=form)
 
 
 @bp.route("/logout")
@@ -78,10 +78,10 @@ def register():
             form.email.errors.append(
                 "Email already registered. Please use a different email."
             )
-            return render_template("register.html", form=form)
+            return render_template("user/register.html", form=form)
 
         login_user(new_trainer)
         flash("Registration successful", "success")
         return redirect(url_for(".index"))
 
-    return render_template("register.html", form=form)
+    return render_template("user/register.html", form=form)

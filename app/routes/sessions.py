@@ -27,7 +27,7 @@ def sessions():
         .order_by(Session.start_dt)
     )
     sessions = db.session.execute(stmt).scalars().all()
-    return render_template("sessions.html", sessions=sessions)
+    return render_template("sessions/sessions.html", sessions=sessions)
 
 
 @bp.route("/sessions/add", methods=["GET", "POST"])
@@ -126,7 +126,7 @@ def add_session():
                 "danger"
             )
 
-    return render_template("add_session.html", form=form)
+    return render_template("sessions/add_session.html", form=form)
 
 
 @bp.route("/sessions/add_exercise_row")

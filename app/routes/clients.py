@@ -15,7 +15,7 @@ from . import bp
 def clients():
     stmt = select(Client).where(Client.trainer_id == current_user.id)
     clients = db.session.execute(stmt).scalars().all()
-    return render_template("clients.html", clients=clients)
+    return render_template("clients/clients.html", clients=clients)
 
 
 @bp.route("/clients/add", methods=["GET", "POST"])
@@ -46,9 +46,9 @@ def add_client():
             form.name.errors.append(
                 "A client with this name already exists."
             )
-            return render_template("add_client.html", form=form)
+            return render_template("clients/add_client.html", form=form)
 
         flash("Client added successfully", "success")
         return redirect(url_for(".clients"))
 
-    return render_template("add_client.html", form=form)
+    return render_template("clients/add_client.html", form=form)
