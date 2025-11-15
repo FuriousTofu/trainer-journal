@@ -20,7 +20,9 @@
     <tbody>
         {% for session in sessions %}
             <tr>
-                <td class="text-start">{{ session.start_dt }}</td>
+                <td class="text-start">
+                    {{ session.start_dt|dt_no_seconds }}
+                </td>
                 <td class="text-end">{{ session.client.name }}</td>
                 <td class="text-end">{{ session.mode }}</td>
                 <td class="text-end">{{ session.status }}</td>

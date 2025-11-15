@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from .template_filters import init_template_filters
 
 login_manager = LoginManager()
 login_manager.login_view = "main.login"
@@ -15,6 +16,8 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
 
+    init_template_filters(app)
+    
     from app.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
