@@ -8,3 +8,4 @@ alembic
 pytz # for timezone handling
 requests
 nanoid
+python-dotenv
