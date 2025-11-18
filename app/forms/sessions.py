@@ -3,7 +3,7 @@ from wtforms import (
     IntegerField, SelectField,
     TextAreaField, DateTimeField,
     FieldList, FormField, Form,
-    SubmitField,
+    SubmitField, DecimalField,
 )
 from wtforms.validators import DataRequired, NumberRange, Length
 
@@ -32,7 +32,7 @@ class AddSessionExerciseForm(Form):
             NumberRange(min=1, message="There must be at least 1 repetition.")
         ]
     )
-    weight = IntegerField(
+    weight = DecimalField(
         "Weight",
         validators=[
             DataRequired(message="Weight is required."),
