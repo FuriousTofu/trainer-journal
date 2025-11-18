@@ -1,8 +1,8 @@
-"""Init schema
+"""initial schema
 
-Revision ID: 7ef8d545d31d
+Revision ID: c507b16f70ef
 Revises: 
-Create Date: 2025-09-22 16:33:05.839125
+Create Date: 2025-11-18 10:24:44.030795
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '7ef8d545d31d'
+revision: str = 'c507b16f70ef'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,6 +33,7 @@ def upgrade() -> None:
     )
     op.create_table('clients',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('public_id', sa.String(length=6), nullable=False),
     sa.Column('trainer_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('contact', sa.String(length=100), nullable=True),
@@ -42,6 +43,7 @@ def upgrade() -> None:
     sa.CheckConstraint('price >= 0', name='ck_client_price_nonnegative'),
     sa.ForeignKeyConstraint(['trainer_id'], ['trainers.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('public_id'),
     sa.UniqueConstraint('trainer_id', 'name', name='uq_client_name_per_trainer')
     )
     op.create_index(op.f('ix_clients_trainer_id'), 'clients', ['trainer_id'], unique=False)
@@ -57,6 +59,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_exercises_trainer_id'), 'exercises', ['trainer_id'], unique=False)
     op.create_table('sessions',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('public_id', sa.String(length=8), nullable=False),
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('start_dt', sa.DateTime(timezone=True), nullable=False),
     sa.Column('duration_min', sa.Integer(), server_default='60', nullable=False),
@@ -69,7 +72,8 @@ def upgrade() -> None:
     sa.CheckConstraint('duration_min > 0', name='ck_session_duration_positive'),
     sa.CheckConstraint('price >= 0', name='ck_session_price_nonnegative'),
     sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('public_id')
     )
     op.create_index(op.f('ix_sessions_client_id'), 'sessions', ['client_id'], unique=False)
     op.create_index(op.f('ix_sessions_start_dt'), 'sessions', ['start_dt'], unique=False)

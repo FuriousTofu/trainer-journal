@@ -15,7 +15,7 @@ app.app_context().push()
 config = context.config
 
 # Set the SQLAlchemy URL from the Flask app's config
-config.set_main_option("sqlalchemy.url", str(app.config["SQLALCHEMY_DATABASE_URI"]))
+config.set_main_option("sqlalchemy.url", "sqlite:///instance/trainer.db")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

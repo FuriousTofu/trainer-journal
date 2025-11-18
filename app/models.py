@@ -3,11 +3,19 @@ from sqlalchemy import (
     Enum, ForeignKey, Boolean, CheckConstraint,
     UniqueConstraint, Index, Numeric, text,
 )
-from nanoid import generate
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 from app import db, login_manager
 from flask_login import UserMixin
+
+from app.constants import (
+    PUBLIC_ID_SIZE_CLIENT,
+    PUBLIC_ID_SIZE_SESSION, 
+)
+from app.utils import (
+    generate_client_public_id,
+    generate_session_public_id
+)
 
 
 class Trainer(db.Model, UserMixin):
@@ -61,10 +69,10 @@ class Client(db.Model):
     __tablename__ = "clients"
     id = Column(Integer, primary_key=True)
     public_id = Column(
-        String(12),
+        String(PUBLIC_ID_SIZE_CLIENT),
         nullable=False,
         unique=True,
-        default=lambda: generate(size=12),
+        default=generate_client_public_id,
     )
     trainer_id = Column(
         Integer,
@@ -107,6 +115,12 @@ class Session(db.Model):
 
     __tablename__ = "sessions"
     id = Column(Integer, primary_key=True)
+    public_id = Column(
+        String(PUBLIC_ID_SIZE_SESSION),
+        nullable=False,
+        unique=True,
+        default=generate_session_public_id,
+    )
     client_id = Column(
         Integer,
         ForeignKey("clients.id", ondelete="CASCADE"),
