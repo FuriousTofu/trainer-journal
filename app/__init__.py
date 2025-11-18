@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
 from .config import DevelopmentConfig
-from .template_filters import init_template_filters
+from .utils import init_template_filters
 
 login_manager = LoginManager()
 login_manager.login_view = "main.login"
@@ -11,7 +11,7 @@ db = SQLAlchemy()
 
 
 def create_app(config_class=DevelopmentConfig):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
 
     app.config.from_object(config_class)
     if not app.config["SQLALCHEMY_DATABASE_URI"]:
