@@ -182,6 +182,7 @@ class Exercise(db.Model):
         index=True
     )
     name = Column(String(100), nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True, server_default=expression.true())
     description = Column(Text)
 
     trainer = relationship("Trainer", back_populates="exercises")
