@@ -44,21 +44,29 @@ def add_session():
 
     clients = db.session.execute(
         select(Client.id, Client.name)
-        .where(Client.trainer_id == current_user.id)
+        .where(
+            Client.trainer_id == current_user.id,
+            Client.status == "active"
+        )
         .order_by(Client.name)
     ).all()
     form.client.choices = [(0, "Select Client")] + [
         (c.id, c.name) for c in clients
     ]
+    has_clients = len(form.client.choices) > 1
 
     exercises = db.session.execute(
         select(Exercise.id, Exercise.name)
-        .where(Exercise.trainer_id == current_user.id)
+        .where(
+            Exercise.trainer_id == current_user.id,
+            Exercise.is_active == True
+        )
         .order_by(Exercise.name)
     ).all()
     exercise_choices = [(0, "Select Exercise")] + [
         (e.id, e.name) for e in exercises
     ]
+    has_exercises = len(exercise_choices) > 1
 
     if request.method == "GET" and not form.exercises:
         form.exercises.append_entry()
@@ -126,7 +134,12 @@ def add_session():
                 "danger"
             )
 
-    return render_template("sessions/add_session.html", form=form)
+    return render_template(
+        "sessions/add_session.html",
+        form=form,
+        has_clients=has_clients,
+        has_exercises=has_exercises
+    )
 
 
 @bp.route("/sessions/add_exercise_row")
