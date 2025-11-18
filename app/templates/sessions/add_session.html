@@ -5,99 +5,114 @@
 {% endblock %}
 
 {% block main %}
-    <h2 class="h2">Add New Session</h2>
-    <form method="post" action="{{ url_for('.add_session') }}" novalidate class="add-form" id="add-session-form">
-        {{ form.hidden_tag() }}
-        <div class="row g-2 mb-2">
-            <div class="col-md-6">
-                <div class="form-floating mb-2">
-                    {{ form.client(
-                        class="form-select", 
-                        placeholder="Select Client"
-                    ) }}
-                    {{ form.client.label(class="form-label") }}
-                    {% for error in form.client.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating mb-2">
-                    {{ form.start_dt(
-                        class="form-control",
-                        type="datetime-local",
-                        placeholder="Start Date and Time"
-                    ) }}
-                    {{ form.start_dt.label(class="form-label") }}
-                    {% for error in form.start_dt.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="row g-2 mb-2">
-            <div class="col-md-4">
-                <div class="form-floating mb-2">
-                    {{ form.duration_min(class="form-control", placeholder="Duration (minutes)") }}
-                    {{ form.duration_min.label(class="form-label") }}
-                    {% for error in form.duration_min.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-floating mb-2">
-                    {{ form.mode(
-                        class="form-select",
-                        placeholder="Session Mode"
-                    ) }}
-                    {{ form.mode.label(class="form-label") }}
-                    {% for error in form.mode.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div> 
-            </div>
-            <div class="col-md-4">
-                <div id="price-wrapper">
+    {% if (form.client.choices|length == 0) or (form.exercises.choices|length == 0) %}
+    <a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
+        <i class="bi bi-plus-circle"></i> Add Client
+    </a>
+    <a href="{{ url_for('.add_exercise') }}" class="btn btn-outline-primary mb-3">
+        <i class="bi bi-plus-circle"></i> Add Exercise
+    </a>
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+            <div class="card shadow-sm border-0 text-center p-4" style="width: 300px;">
+                <i class="bi bi-info-circle fs-1 mb-2"></i>
+                <div>To add a session you need to have active clients and exercises.<br>Please add some to activate this view.</div>
+            </div>  
+        </div> 
+    {% else %}
+        <h2 class="h2">Add New Session</h2>
+        <form method="post" action="{{ url_for('.add_session') }}" novalidate class="add-form" id="add-session-form">
+            {{ form.hidden_tag() }}
+            <div class="row g-2 mb-2">
+                <div class="col-md-6">
                     <div class="form-floating mb-2">
-                        {{ form.price(class="form-control", placeholder="Session Price") }}
-                        {{ form.price.label(class="form-label") }}
-                        {% for error in form.price.errors %}
+                        {{ form.client(
+                            class="form-select", 
+                            placeholder="Select Client"
+                        ) }}
+                        {{ form.client.label(class="form-label") }}
+                        {% for error in form.client.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-2">
+                        {{ form.start_dt(
+                            class="form-control",
+                            type="datetime-local",
+                            placeholder="Start Date and Time"
+                        ) }}
+                        {{ form.start_dt.label(class="form-label") }}
+                        {% for error in form.start_dt.errors %}
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="exercise-wrapper">
-            {% for subform in form.exercises %}
-                {% include "helpers/_exercise_row.html" %}
-            {% endfor %}
-        </div>
-        <div class="form-floating mb-2">
-            {{ form.notes(
-                class="form-control", 
-                placeholder="Session Notes (Optional)"
-            ) }}
-            {{ form.notes.label(class="form-label") }}
-            {% for error in form.notes.errors %}
-                <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
-        </div>
-        <div class="d-flex justify-content-center gap-2 mt-3">
-            <a href="{{ url_for('.sessions') }}" class="btn btn-outline-primary">
-                <i class="bi bi-arrow-return-left"></i> Get Back
-            </a>
-            <button
-                type="button"
-                class="btn btn-outline-primary"
-                hx-get="{{ url_for('.exercise_row') }}"
-                hx-target="#exercise-wrapper"
-                hx-include="#add-session-form"
-                hx-swap="beforeend">
-                + Add Exercise
-            </button>
-            {{ form.submit(class="btn btn-primary px-3") }}
-        </div>
-    </form>
+            <div class="row g-2 mb-2">
+                <div class="col-md-4">
+                    <div class="form-floating mb-2">
+                        {{ form.duration_min(class="form-control", placeholder="Duration (minutes)") }}
+                        {{ form.duration_min.label(class="form-label") }}
+                        {% for error in form.duration_min.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating mb-2">
+                        {{ form.mode(
+                            class="form-select",
+                            placeholder="Session Mode"
+                        ) }}
+                        {{ form.mode.label(class="form-label") }}
+                        {% for error in form.mode.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div> 
+                </div>
+                <div class="col-md-4">
+                    <div id="price-wrapper">
+                        <div class="form-floating mb-2">
+                            {{ form.price(class="form-control", placeholder="Session Price") }}
+                            {{ form.price.label(class="form-label") }}
+                            {% for error in form.price.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="exercise-wrapper">
+                {% for subform in form.exercises %}
+                    {% include "helpers/_exercise_row.html" %}
+                {% endfor %}
+            </div>
+            <div class="form-floating mb-2">
+                {{ form.notes(
+                    class="form-control", 
+                    placeholder="Session Notes (Optional)"
+                ) }}
+                {{ form.notes.label(class="form-label") }}
+                {% for error in form.notes.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <a href="{{ url_for('.sessions') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-return-left"></i> Get Back
+                </a>
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    hx-get="{{ url_for('.exercise_row') }}"
+                    hx-target="#exercise-wrapper"
+                    hx-include="#add-session-form"
+                    hx-swap="beforeend">
+                    + Add Exercise
+                </button>
+                {{ form.submit(class="btn btn-primary px-3") }}
+            </div>
+        </form>
+    {% endif %}
 {% endblock %}

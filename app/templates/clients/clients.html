@@ -3,33 +3,43 @@
 {% block title %}Clients{% endblock %}
 
 {% block main %}
-<h2>Your clients list</h2>
-<a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
-    <i class="bi bi-plus-circle"></i> Add Client
-</a>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th class="text-start">Name</th>
-            <th class="text-end">Contact</th>
-            <th class="text-end">Price</th>
-            <th class="text-end">Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for client in clients %}
-            <tr 
-                {% if client.notes %}
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="right"
-                    title="{{ client.notes }}"
-                {% endif %}>
-                <td class="text-start">{{ client.name }}</td>
-                <td class="text-end">{{ client.contact }}</td>
-                <td class="text-end">{{ client.price}}</td>
-                <td class="text-end">{{ client.status }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <h2>Your clients list</h2>
+    <a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
+        <i class="bi bi-plus-circle"></i> Add Client
+    </a>
+    {% if clients|length == 0 %}
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+        <div class="card shadow-sm border-0 text-center p-4" style="width: 300px;">
+            <i class="bi bi-info-circle fs-1 mb-2"></i>
+            <div>You have no clients yet.<br>Please add some to activate this view.</div>
+        </div>  
+    </div>   
+    {% else %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="text-start">Name</th>
+                    <th class="text-end">Contact</th>
+                    <th class="text-end">Price</th>
+                    <th class="text-end">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                    <tr 
+                        {% if client.notes %}
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="{{ client.notes }}"
+                        {% endif %}>
+                        <td class="text-start">{{ client.name }}</td>
+                        <td class="text-end">{{ client.contact }}</td>
+                        <td class="text-end">{{ client.price}}</td>
+                        <td class="text-end">{{ client.status }}</td>
+                    </tr>
+                {% endfor %}
+                
+            </tbody>
+        </table>
+    {% endif %}
 {% endblock %}
