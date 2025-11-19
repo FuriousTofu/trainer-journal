@@ -27,6 +27,8 @@
             <tbody>
                 {% for client in clients %}
                     <tr 
+                        class="table-row-link"
+                        data-url="{{ url_for('main.client', client_public_id=client.public_id) }}"
                         {% if client.notes %}
                             data-bs-toggle="tooltip"
                             data-bs-placement="right"
@@ -38,7 +40,9 @@
                         <td class="text-end">{{ client.status }}</td>
                     </tr>
                 {% endfor %}
-                
+                {% block scripts %}
+                    <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
+                {% endblock %}
             </tbody>
         </table>
     {% endif %}
