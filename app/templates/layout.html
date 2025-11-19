@@ -113,25 +113,7 @@
             crossorigin="anonymous">
         </script>
         <script src="{{ url_for('static', filename='js/htmx.min.js') }}"></script>
-        <script>
-            (() => {
-            'use strict'
-            const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            tooltipTriggerList.forEach(tooltipTriggerEl => {
-                new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-            })()
-        </script>
-        <script>
-            const flashContainer = document.getElementById('flash-container');
-            if (flashContainer) {
-                setTimeout(() => {
-                flashContainer.style.transition = 'opacity 0.5s ease';
-                flashContainer.style.opacity = '0';
-                setTimeout(() => flashContainer.remove(), 500);
-                }, 5000);
-            }
-        </script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+        {% block scripts %}{% endblock %}
     </body>
-
 </html>

@@ -33,3 +33,7 @@ body {
   height: auto;
   min-height: 120px;
 }
+
+.table-row-link {
+    cursor: pointer;
+}
