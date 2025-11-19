@@ -10,7 +10,7 @@ from flask_login import UserMixin
 
 from app.constants import (
     PUBLIC_ID_SIZE_CLIENT,
-    PUBLIC_ID_SIZE_SESSION, 
+    PUBLIC_ID_SIZE_SESSION,
 )
 from app.utils import (
     generate_client_public_id,
@@ -182,7 +182,12 @@ class Exercise(db.Model):
         index=True
     )
     name = Column(String(100), nullable=False)
-    is_active = Column(Boolean, nullable=False, default=True, server_default=expression.true())
+    is_active = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=expression.true()
+    )
     description = Column(Text)
 
     trainer = relationship("Trainer", back_populates="exercises")

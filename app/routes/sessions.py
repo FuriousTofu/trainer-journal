@@ -59,7 +59,7 @@ def add_session():
         select(Exercise.id, Exercise.name)
         .where(
             Exercise.trainer_id == current_user.id,
-            Exercise.is_active == True
+            Exercise.is_active.is_(True)
         )
         .order_by(Exercise.name)
     ).all()
