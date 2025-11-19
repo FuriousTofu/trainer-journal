@@ -99,6 +99,10 @@ def add_session():
                 ex = db.session.get(Exercise, sub.exercise.data)
                 if not ex or ex.trainer_id != current_user.id:
                     abort(404)
+                
+                weight=sub.weight.data
+                if weight is None:
+                    weight = 0
 
                 se = SessionExercise(
                     session_id=s.id,
@@ -106,7 +110,7 @@ def add_session():
                     exercise_id=sub.exercise.data,
                     sets=sub.sets.data,
                     reps=sub.reps.data,
-                    weight=sub.weight.data,
+                    weight=weight,
                 )
                 db.session.add(se)
 
