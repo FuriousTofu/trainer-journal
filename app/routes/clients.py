@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash
+from flask import abort, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -52,3 +52,35 @@ def add_client():
         return redirect(url_for(".clients"))
 
     return render_template("clients/add_client.html", form=form)
+
+
+@bp.route("/clients/<string:client_public_id>", methods=["GET", "POST"])
+@login_required
+def client(client_public_id):
+    stmt = select(Client).where(
+        Client.public_id == client_public_id,
+        Client.trainer_id == current_user.id
+    )
+    client = db.session.execute(stmt).scalars().first()
+
+    if not client:
+        abort(404)
+
+    form = AddClientForm(obj=client)
+    if form.validate_on_submit():
+        form.populate_obj(client)
+        try:
+            db.session.commit()
+            flash("Client updated successfully", "success")
+        except Exception:
+            db.session.rollback()
+            flash("Error updating client. Please try again.", "danger")
+            return render_template("clients/client.html")
+
+        return redirect(url_for(".client", client_public_id=client.public_id))
+
+    return render_template(
+        "clients/client.html",
+        client=client,
+        form=form,
+    )
