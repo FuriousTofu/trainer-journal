@@ -28,7 +28,7 @@
                 {% for client in clients %}
                     <tr 
                         class="table-row-link"
-                        data-url="{{ url_for('main.client', client_public_id=client.public_id) }}"
+                        data-url="{{ url_for('.client', client_public_id=client.public_id) }}"
                         {% if client.notes %}
                             data-bs-toggle="tooltip"
                             data-bs-placement="right"

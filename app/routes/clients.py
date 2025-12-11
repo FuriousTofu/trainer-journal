@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.models import Client
+from app.models import Client, Session
 from app.forms import AddClientForm
 
 from . import bp
@@ -66,6 +66,16 @@ def client(client_public_id):
     if not client:
         abort(404)
 
+    stmt = (
+        select(Session)
+        .where(
+            Session.client.has(trainer_id=current_user.id),
+            Session.client.has(id=client.id)
+        )
+        .order_by(Session.start_dt)
+    )
+    sessions = db.session.execute(stmt).scalars().all()
+
     form = AddClientForm(obj=client)
     if form.validate_on_submit():
         form.populate_obj(client)
@@ -83,4 +93,5 @@ def client(client_public_id):
         "clients/client.html",
         client=client,
         form=form,
+        sessions=sessions
     )

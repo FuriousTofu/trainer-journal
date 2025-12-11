@@ -7,6 +7,14 @@
 {% block main %}
     <h2 class="h2">{{ client.name }}</h2>
     <form method="post" novalidate class="add-form">
+    <div class="d-flex justify-content-center gap-2 mb-2">
+        <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-return-left"></i> Clients
+        </a>
+        <button type="submit" class="btn btn-primary">
+                Save changes
+        </button>
+    </div>
         {{ form.hidden_tag() }}
         <div class="row g-2 mb-2">
             <div class="col-md-6">
@@ -55,13 +63,33 @@
                 <div class="text-danger small">{{ error }}</div>
             {% endfor %}
         </div>
-        <div class="d-flex justify-content-center gap-2 mt-3">
-            <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary">
-                <i class="bi bi-arrow-return-left"></i> Clients
-            </a>
-            <button type="submit" class="btn btn-primary">
-                    Save changes
-            </button>
-        </div>
     </form>
+    <h3 class="h3">{{ client.name }}'s Sessions</h3>
+    <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="text-start">Start</th>
+                    <th class="text-end">Mode</th>
+                    <th class="text-end">Status</th>
+                    <th class="text-end">Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                    <tr 
+                        class="table-row-link"
+                        data-url="{{ url_for('.session', session_public_id=session.public_id) }}">
+                        <td class="text-start">
+                            {{ session.start_dt|dt_no_seconds }}
+                        </td>
+                        <td class="text-end">{{ session.mode }}</td>
+                        <td class="text-end">{{ session.status }}</td>
+                        <td class="text-end">{{ session.is_paid }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% block scripts %}
+        <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
+    {% endblock %}
 {% endblock %}
