@@ -13,6 +13,7 @@ from app.models import (
 )
 from app.forms import (
     AddSessionForm, AddSessionHelperForm,
+    EditSessionForm,
 )
 
 from . import bp
@@ -28,6 +29,38 @@ def sessions():
     )
     sessions = db.session.execute(stmt).scalars().all()
     return render_template("sessions/sessions.html", sessions=sessions)
+
+
+@bp.route("/sessions/<string:session_public_id>", methods=["GET", "POST"])
+@login_required
+def session(session_public_id):
+    stmt = select(Session).where(
+        Session.public_id == session_public_id,
+        Session.client.has(trainer_id=current_user.id)
+    )
+    session_obj = db.session.execute(stmt).scalars().first()
+
+    if not session_obj:
+        abort(404)
+
+    form = EditSessionForm(obj=session_obj)
+    if form.validate_on_submit():
+        form.populate_obj(session_obj)
+        try:
+            db.session.commit()
+            flash("Srssion updated successgully", "success")
+        except Exception:
+            db.session.rollback()
+            flash("Error updating session. Please try again", "danger")
+            return render_template("sessions/session.html", session=session_obj, form=form)
+        
+        return redirect(url_for(".session", session_public_id=session_obj.public_id))
+    
+    return render_template(
+        "sessions/session.html",
+        session=session_obj,
+        form=form
+    )
 
 
 @bp.route("/sessions/add", methods=["GET", "POST"])

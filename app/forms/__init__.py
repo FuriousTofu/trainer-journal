@@ -2,5 +2,5 @@
 
 from .clients import AddClientForm
 from .exercises import AddExerciseForm
-from .sessions import AddSessionForm, AddSessionHelperForm
+from .sessions import AddSessionForm, AddSessionHelperForm, EditSessionForm
 from .user import RegisterForm, LoginForm

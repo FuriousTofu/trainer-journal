@@ -100,6 +100,9 @@ class AddSessionForm(FlaskForm):
     )
     submit = SubmitField("Add Session")
 
+class EditSessionForm(AddSessionForm):
+    client = None  # Client cannot be changed when editing a session
+    submit = SubmitField("Save Changes")
 
 class AddSessionHelperForm(Form):
     exercises = FieldList(
