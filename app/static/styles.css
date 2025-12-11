@@ -14,6 +14,12 @@ body {
   padding: 1rem;
 }
 
+.table{
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
 .form-signin .form-floating:focus-within {
   z-index: 2;
 }
