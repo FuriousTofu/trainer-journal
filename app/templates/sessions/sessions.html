@@ -27,7 +27,9 @@
             </thead>
             <tbody>
                 {% for session in sessions %}
-                    <tr>
+                    <tr
+                        class="table-row-link"
+                        data-url="{{ url_for('.session', session_public_id=session.public_id) }}">
                         <td class="text-start">
                             {{ session.start_dt|dt_no_seconds }}
                         </td>
@@ -37,6 +39,9 @@
                         <td class="text-end">{{ session.is_paid }}</td>
                     </tr>
                 {% endfor %}
+                {% block scripts %}
+                    <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
+                {% endblock %}
             </tbody>
         </table>
     {% endif %}

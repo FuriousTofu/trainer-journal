@@ -88,6 +88,19 @@
                     {% include "helpers/_exercise_row.html" %}
                 {% endfor %}
             </div>
+            <div class="row g-2 mb-2">
+                <div class="col">
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        hx-get="{{ url_for('.exercise_row') }}"
+                        hx-target="#exercise-wrapper"
+                        hx-include="#add-session-form"
+                        hx-swap="beforeend">
+                        + Add Exercise
+                    </button>
+                </div>
+            </div>
             <div class="form-floating mb-2">
                 {{ form.notes(
                     class="form-control", 
@@ -102,15 +115,6 @@
                 <a href="{{ url_for('.sessions') }}" class="btn btn-outline-primary">
                     <i class="bi bi-arrow-return-left"></i> Get Back
                 </a>
-                <button
-                    type="button"
-                    class="btn btn-outline-primary"
-                    hx-get="{{ url_for('.exercise_row') }}"
-                    hx-target="#exercise-wrapper"
-                    hx-include="#add-session-form"
-                    hx-swap="beforeend">
-                    + Add Exercise
-                </button>
                 {{ form.submit(class="btn btn-primary px-3") }}
             </div>
         </form>
