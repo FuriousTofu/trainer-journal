@@ -1,4 +1,5 @@
 {% set index = subform.name | replace('exercises-', '') %}
+{% set remove_url = url_for('.remove_exercise_row') %}
 <div class="row g-2 mb-2" data-index="{{ index }}">
     <div class ="col-md-4">
         <div class="form-floating">
@@ -52,10 +53,13 @@
         <button
         type="button"
         class="btn btn-outline-danger w-100 d-md-inline d-block mb-md-0"
-        hx-post="{{ url_for('.remove_exercise_row') }}"
+        hx-post="{{ remove_url }}"
         hx-target="#exercise-wrapper"
-        hx-include="#exercise-wrapper"
-        hx-vals='{"remove_index": "{{ index }}"}'
+        hx-include="#{{ form_id }}"
+        hx-vals='{
+            "remove_index": "{{ index }}",
+            "mode": "{{ mode }}"
+        }'
         hx-swap="innerHTML">
         <i class="bi bi-x"></i>
         </button>
