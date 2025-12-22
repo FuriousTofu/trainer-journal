@@ -41,5 +41,20 @@ body {
 }
 
 .table-row-link {
-    cursor: pointer;
+  cursor: pointer;
+}
+
+.tj-form-field {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  height: 58px;
+  padding: 0.75rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tj-form-field--switch .form-check-input {
+  transform: scale(1.55);
 }
