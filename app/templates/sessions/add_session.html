@@ -5,6 +5,9 @@
 {% endblock %}
 
 {% block main %}
+    {% set form_id = "add-session-form" %}
+    {% set mode = "add" %}
+    
     {% if not has_clients or not has_exercises %}
     <a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
         <i class="bi bi-plus-circle"></i> Add Client
@@ -85,7 +88,7 @@
             </div>
             <div id="exercise-wrapper">
                 {% for subform in form.exercises %}
-                    {% include "helpers/_exercise_row.html" %}
+                    {% include "helpers/_exercise_row.html" with context %}
                 {% endfor %}
             </div>
             <div class="row g-2 mb-2">

@@ -36,7 +36,13 @@
                         <td class="text-end">{{ session.client.name }}</td>
                         <td class="text-end">{{ session.mode }}</td>
                         <td class="text-end">{{ session.status }}</td>
-                        <td class="text-end">{{ session.is_paid }}</td>
+                        <td class="text-end">
+                            {% if session.is_paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Unpaid</span>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
                 {% block scripts %}
