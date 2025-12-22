@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import (
-    IntegerField, SelectField,
+    BooleanField, IntegerField, SelectField,
     TextAreaField, DateTimeField,
     FieldList, FormField, Form,
     SubmitField, DecimalField,
@@ -13,6 +13,7 @@ class AddSessionExerciseForm(Form):
     exercise = SelectField(
         "Exercise",
         coerce=int,
+        choices=[],
         validators=[
             DataRequired(message="Exercise is required."),
             NumberRange(min=1, message="Select an exercise.")
@@ -40,16 +41,7 @@ class AddSessionExerciseForm(Form):
         ]
     )
 
-
-class AddSessionForm(FlaskForm):
-    client = SelectField(
-        "Client",
-        coerce=int,
-        validators=[
-            DataRequired(message="Client selection is required."),
-            NumberRange(min=1, message="Please select a client.")
-        ]
-    )
+class SessionHeaderBaseForm(FlaskForm):
     start_dt = DateTimeField(
         "Start Date and Time",
         format="%Y-%m-%dT%H:%M",
@@ -93,6 +85,18 @@ class AddSessionForm(FlaskForm):
         ]
     )
 
+
+class AddSessionForm(SessionHeaderBaseForm):
+    client = SelectField(
+        "Client",
+        coerce=int,
+        choices=[],
+        validators=[
+            DataRequired(message="Client selection is required."),
+            NumberRange(min=1, message="Please select a client.")
+        ]
+    )
+ 
     exercises = FieldList(
         FormField(AddSessionExerciseForm),
         min_entries=0,
@@ -100,13 +104,26 @@ class AddSessionForm(FlaskForm):
     )
     submit = SubmitField("Add Session")
 
-class EditSessionForm(AddSessionForm):
-    client = None  # Client cannot be changed when editing a session
+class EditSessionForm(SessionHeaderBaseForm):
+    status = SelectField(
+        "Status",
+        choices=[
+            ("planned", "Planned"),
+            ("done", "Done"),
+            ("cancelled", "Cancelled"),
+            ("no_show", "No Show"),
+        ],
+        validators=[
+            DataRequired(message="Status is required.")
+        ]
+    )
+    is_paid = BooleanField("Paid?")
     submit = SubmitField("Save Changes")
 
-class AddSessionHelperForm(Form):
+class SessionExercisesHelperForm(Form):
     exercises = FieldList(
         FormField(AddSessionExerciseForm),
         min_entries=0,
         max_entries=30
     )
+
