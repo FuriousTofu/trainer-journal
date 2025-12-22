@@ -5,6 +5,7 @@ from flask import (
 from flask_login import login_required, current_user
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime, timezone
 
 from app import db
 from app.models import (
@@ -12,8 +13,8 @@ from app.models import (
     Exercise, SessionExercise,
 )
 from app.forms import (
-    AddSessionForm, AddSessionHelperForm,
-    EditSessionForm,
+    AddSessionForm, SessionExercisesHelperForm,
+    EditSessionForm
 )
 
 from . import bp
@@ -43,24 +44,116 @@ def session(session_public_id):
     if not session_obj:
         abort(404)
 
-    form = EditSessionForm(obj=session_obj)
-    if form.validate_on_submit():
-        form.populate_obj(session_obj)
-        try:
-            db.session.commit()
-            flash("Srssion updated successgully", "success")
-        except Exception:
-            db.session.rollback()
-            flash("Error updating session. Please try again", "danger")
-            return render_template("sessions/session.html", session=session_obj, form=form)
-        
-        return redirect(url_for(".session", session_public_id=session_obj.public_id))
+    exercise_choices = _exercise_choices(current_user.id)
+
+    if request.method == "POST":
+        header_form = EditSessionForm(formdata=request.form, obj=session_obj)
+        exercises_form = SessionExercisesHelperForm(formdata=request.form)
+        for entry in exercises_form.exercises:
+            entry.form.exercise.choices = exercise_choices
+
+    else:
+        header_form = EditSessionForm(obj=session_obj)
+        exercises_form = SessionExercisesHelperForm()
+        for se in session_obj.session_exercises:
+            entry = exercises_form.exercises.append_entry({
+                "exercise": se.exercise_id,
+                "sets": se.sets,
+                "reps": se.reps,
+                "weight": se.weight,
+            })
+            entry.form.exercise.choices = exercise_choices
+        if len(exercises_form.exercises) == 0:
+            entry = exercises_form.exercises.append_entry()
+            entry.form.exercise.choices = exercise_choices
+    
+    if request.method == "POST":
+        header_ok = header_form.validate()
+        exercises_ok = exercises_form.validate()
+        if header_ok and exercises_ok:
+            paid_status = session_obj.is_paid
+            header_form.populate_obj(session_obj)
+            if session_obj.is_paid:
+                if not paid_status and session_obj.payment_date is None:
+                    session_obj.payment_date = datetime.now(timezone.utc)
+            else:
+                session_obj.payment_date = None
+                
+            try:
+                db.session.query(SessionExercise).filter_by(
+                    session_id=session_obj.id
+                ).delete()
+
+                for entry in exercises_form.exercises:
+                    sub = entry.form
+
+                    ex = db.session.get(Exercise, sub.exercise.data)
+                    if not ex or ex.trainer_id != current_user.id:
+                        abort(404)
+                    
+                    weight=sub.weight.data
+                    if weight is None:
+                        weight = 0
+                    
+                    se = SessionExercise(
+                        session_id=session_obj.id,
+                        client_id=session_obj.client_id,
+                        exercise_id=sub.exercise.data,
+                        sets=sub.sets.data,
+                        reps=sub.reps.data,
+                        weight=weight,
+                    )
+                    db.session.add(se)
+                db.session.commit()
+                flash("Session updated successfully", "success")
+                return redirect(
+                    url_for(".session",session_public_id=session_obj.public_id)
+                )
+            
+            except Exception:
+                db.session.rollback()
+                flash("Error updating session. Please try again", "danger")
+                return render_template(
+                    "sessions/session.html",
+                    session=session_obj,
+                    form=header_form,
+                    exercises_form=exercises_form
+                )
+        else:
+            flash("Please correct the errors below.", "danger")
     
     return render_template(
         "sessions/session.html",
         session=session_obj,
-        form=form
+        form=header_form,
+        exercises_form=exercises_form
     )
+
+
+@bp.route("/sessions/<string:session_public_id>/delete", methods=["POST"])
+@login_required
+def delete_session(session_public_id):
+    stmt = select(Session).where(
+        Session.public_id == session_public_id,
+        Session.client.has(trainer_id=current_user.id)
+    )
+    session_obj = db.session.execute(stmt).scalars().first()
+
+    if not session_obj:
+        abort(404)
+
+    try:
+        db.session.delete(session_obj)
+        db.session.commit()
+        flash("Session deleted successfully", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error deleting session. Please try again", "danger")
+        return redirect(
+            url_for(".session", session_public_id=session_obj.public_id)
+        )
+
+    return redirect(url_for(".sessions"))
 
 
 @bp.route("/sessions/add", methods=["GET", "POST"])
@@ -190,7 +283,10 @@ def exercise_row():
 
     exercises = db.session.execute(
         select(Exercise.id, Exercise.name)
-        .where(Exercise.trainer_id == current_user.id)
+        .where(
+            Exercise.trainer_id == current_user.id,
+            Exercise.is_active.is_(True)
+        )
         .order_by(Exercise.name)
     ).all()
     exercise_choices = [(0, "Select Exercise")] + [
@@ -198,7 +294,42 @@ def exercise_row():
     ]
     subform.exercise.choices = exercise_choices
 
-    return render_template("helpers/_exercise_row.html", subform=subform)
+    return render_template(
+        "helpers/_exercise_row.html",
+        subform=subform,
+        mode="add",
+        form_id="add-session-form"
+    )
+
+@bp.route("/sessions/<string:session_public_id>/add_exercise_row")
+@login_required
+def edit_exercise_row(session_public_id):
+    if not request.headers.get("HX-Request"):
+        abort(404)
+    
+    session_obj = db.session.execute(
+        select(Session).where(
+            Session.public_id == session_public_id,
+            Session.client.has(trainer_id=current_user.id)  
+        )
+    ).scalars().first()
+    if not session_obj:
+        abort(404)
+    
+    exercises_choices = _exercise_choices(current_user.id)
+    exercises_form = SessionExercisesHelperForm(formdata=request.args)
+    for entry in exercises_form.exercises:
+        entry.form.exercise.choices = exercises_choices
+
+    new_entry = exercises_form.exercises.append_entry()
+    new_entry.form.exercise.choices = exercises_choices
+
+    return render_template(
+        "helpers/_exercise_row.html",
+        subform=new_entry,
+        mode="edit",
+        form_id="edit-session-form"
+    )
 
 
 @bp.route("/sessions/remove_exercise_row", methods=["POST"])
@@ -206,6 +337,10 @@ def exercise_row():
 def remove_exercise_row():
     if not request.headers.get("HX-Request"):
         abort(404)
+
+    mode = request.form.get("mode")
+    if mode not in {"add", "edit"}:
+        abort(400)
 
     remove_index_raw = request.form.get("remove_index")
     if remove_index_raw is None:
@@ -215,8 +350,10 @@ def remove_exercise_row():
     except ValueError:
         abort(400)
 
-    orig_form = AddSessionForm(formdata=request.form)
-    new_form = AddSessionHelperForm()
+    form_id = "add-session-form" if mode == "add" else "edit-session-form"
+
+    orig_form = SessionExercisesHelperForm(formdata=request.form)
+    new_form = SessionExercisesHelperForm()
 
     if not (0 <= remove_index < len(orig_form.exercises)):
         abort(400)
@@ -232,7 +369,10 @@ def remove_exercise_row():
 
     exercises = db.session.execute(
         select(Exercise.id, Exercise.name)
-        .where(Exercise.trainer_id == current_user.id)
+        .where(
+            Exercise.trainer_id == current_user.id,
+            Exercise.is_active.is_(True)
+        )
         .order_by(Exercise.name)
     ).all()
     exercise_choices = [(0, "Select Exercise")] + [
@@ -241,7 +381,10 @@ def remove_exercise_row():
     for sub in new_form.exercises:
         sub.form.exercise.choices = exercise_choices
 
-    return render_template("helpers/_exercise_rows.html", form=new_form)
+    return render_template(
+        "helpers/_exercise_rows.html", form=new_form,
+        mode=mode, form_id=form_id
+    )
 
 
 @bp.route("/sessions/client-price")
@@ -262,3 +405,17 @@ def client_price():
     ).first_or_404()
     form.price.data = client.price or 0
     return render_template("helpers/_price_field.html", form=form)
+
+
+def _exercise_choices(user_id: int):
+    exercises = db.session.execute(
+        select(Exercise.id, Exercise.name)
+        .where(
+            Exercise.trainer_id == user_id,
+            Exercise.is_active.is_(True)
+        )
+        .order_by(Exercise.name)
+    ).all()
+    return [(0, "Select Exercise")] + [
+        (e.id, e.name) for e in exercises
+    ]
