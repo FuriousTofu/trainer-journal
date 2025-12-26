@@ -121,5 +121,8 @@
                 {{ form.submit(class="btn btn-primary px-3") }}
             </div>
         </form>
+            {% block scripts %}
+                <script src="{{ url_for('static', filename='js/ex-history.js') }}"></script>
+            {% endblock %}
     {% endif %}
 {% endblock %}

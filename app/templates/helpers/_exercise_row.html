@@ -3,10 +3,17 @@
 <div class="row g-2 mb-2" data-index="{{ index }}">
     <div class ="col-md-4">
         <div class="form-floating">
-            {{ subform.exercise(
-                class="form-select", 
-                placeholder="Select Exercise"
-            ) }}
+            {{ subform.exercise(**{
+                "class": "form-select",
+                "placeholder": "Select Exercise",
+
+                "hx-get": url_for(".exercise_history"),
+                "hx-trigger": "change",
+                "hx-target": "#ex-history-" ~ index,
+                "hx-include": "#" ~ form_id,
+                "hx-vals": '{"row_index": "' ~ index ~ '"}',
+                "hx-swap": "innerHTML"
+            }) }}
             {{ subform.exercise.label(class="form-label") }}
             {% for error in subform.exercise.errors %}
                 <div class="text-danger small">{{ error }}</div>
@@ -52,7 +59,7 @@
     <div class="col-md-1 d-flex">
         <button
         type="button"
-        class="btn btn-outline-danger w-100 d-md-inline d-block mb-md-0"
+        class="btn btn-outline-primary w-100 d-md-inline d-block mb-md-0"
         hx-post="{{ remove_url }}"
         hx-target="#exercise-wrapper"
         hx-include="#{{ form_id }}"
@@ -65,3 +72,4 @@
         </button>
     </div>
 </div>
+<div id="ex-history-{{ index }}" class="mb-2"></div>

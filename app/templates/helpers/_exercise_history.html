@@ -1,0 +1,11 @@
+{% if rows %}
+    <div class="small text-muted">
+        {% for start_dt, sets, reps, weight in rows %}
+            <div class="d-flex justify-content-between border-bottom py-1">
+                <span>{{ start_dt | dt_no_seconds("%d.%m.%Y") }}</span>
+                <span>{{ sets }} x {{ reps }} </span>
+                <span>{{ weight }} kg</span>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

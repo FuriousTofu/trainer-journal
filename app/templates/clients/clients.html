@@ -1,12 +1,15 @@
 {% extends "layout.html" %}
+{% from "macros/badges.html" import status_badge %}
 
 {% block title %}Clients{% endblock %}
 
 {% block main %}
-    <h2>Your clients list</h2>
-    <a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
-        <i class="bi bi-plus-circle"></i> Add Client
-    </a>
+    <div class="d-flex justify-content-center gap-3 mb-3">
+        <h2>Your clients list</h2>
+        <a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
+            <i class="bi bi-plus-circle"></i> Add Client
+        </a>
+    </div>
     {% if clients|length == 0 %}
     <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
         <div class="card shadow-sm border-0 text-center p-4" style="width: 300px;">
@@ -19,9 +22,9 @@
             <thead>
                 <tr>
                     <th class="text-start">Name</th>
-                    <th class="text-end">Contact</th>
+                    <th class="text-start">Contact</th>
+                    <th class="text-start">Status</th>
                     <th class="text-end">Price</th>
-                    <th class="text-end">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,10 +38,11 @@
                             title="{{ client.notes }}"
                         {% endif %}>
                         <td class="text-start">{{ client.name }}</td>
-                        <td class="text-end">{{ client.contact }}</td>
+                        <td class="text-start">{{ client.contact }}</td>
+                        <td class="text-start">
+                            {{ status_badge(client.status) }}</td>
                         <td class="text-end">{{ client.price}}</td>
-                        <td class="text-end">{{ client.status }}</td>
-                    </tr>
+                        </tr>
                 {% endfor %}
                 {% block scripts %}
                     <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
@@ -46,4 +50,9 @@
             </tbody>
         </table>
     {% endif %}
+        <div class="d-flex justify-content-center align-items-left" style="width: 350px;">
+            <p class="mt-2">
+                <a href="{{ url_for('.register') }}" class="auth-link">Archieved clients</a>
+            </p>
+        </div>
 {% endblock %}

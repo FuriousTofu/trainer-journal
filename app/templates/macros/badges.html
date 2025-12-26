@@ -1,0 +1,40 @@
+{# Session payment badge #}
+{% macro paid_badge(is_paid) %}
+    {% if is_paid %}
+        Paid
+    {% else %}
+        Unpaid
+    {% endif %}
+{% endmacro %}
+
+{% macro session_status_badge(status) %}
+    {% if status == 'planned' %}
+        <span class="badge rounded-pill text-bg-primary">Planned</span>
+    {% elif status == 'done' %}
+        <span class="badge rounded-pill text-bg-success">Done</span>
+    {% elif status == 'cancelled' %}
+        <span class="badge rounded-pill text-bg-warning">Cancelled</span>
+    {% else %}
+        <span class="badge rounded-pill text-bg-danger">No Show</span>
+    {% endif %}
+{% endmacro %}
+
+{# Session mode badge #}
+{% macro mode_badge(mode) %}
+    {% if mode == 'online' %}
+        Online
+    {% else %}
+        In-person
+    {% endif %}
+{% endmacro %}
+
+{# Client status badge #}
+{% macro status_badge(status) %}
+    {% if status == 'active' %}
+        <span class="badge rounded-pill bg-success">Active</span>
+    {% elif status == 'pause' %}
+        <span class="badge rounded-pill bg-info">On Pause</span>
+    {% else %}
+        <span class="badge rounded-pill bg-secondary">Archived</span>
+    {% endif %}
+{% endmacro %}
