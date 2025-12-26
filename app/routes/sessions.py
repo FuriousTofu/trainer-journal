@@ -159,6 +159,9 @@ def delete_session(session_public_id):
 @bp.route("/sessions/add", methods=["GET", "POST"])
 @login_required
 def add_session():
+    # preselect client if route callet from client card
+    client_public_id = request.args.get("client_public_id", type=str)
+
     form = AddSessionForm()
 
     form.client.render_kw = {
@@ -169,7 +172,7 @@ def add_session():
     }  # God bless HTMX
 
     clients = db.session.execute(
-        select(Client.id, Client.name)
+        select(Client.id, Client.name, Client.public_id)
         .where(
             Client.trainer_id == current_user.id,
             Client.status == "active"
@@ -180,6 +183,13 @@ def add_session():
         (c.id, c.name) for c in clients
     ]
     has_clients = len(form.client.choices) > 1
+
+    if request.method == "GET" and client_public_id:
+        preselected = next((c for c in clients if c.public_id == client_public_id), None)
+        if not preselected:
+            abort(404)
+        form.client.data = preselected.id
+        form.price.data = db.session.get(Client, preselected.id).price
 
     exercises = db.session.execute(
         select(Exercise.id, Exercise.name)
@@ -270,6 +280,61 @@ def add_session():
         has_clients=has_clients,
         has_exercises=has_exercises
     )
+
+
+@bp.route("/sessions/exercise_history", methods=["GET"])
+@login_required
+def exercise_history():
+    if not request.headers.get("HX-Request"):
+        abort(404)
+    client_raw = request.values.get("client")
+    if not client_raw:
+        return ""
+    try:
+        client_id = int(client_raw)
+    except ValueError:
+        return ""
+
+    client_ok = db.session.execute(
+        select(Client).where(
+            Client.id == client_id,
+            Client.trainer_id == current_user.id
+        )
+    ).scalars().first()
+    if not client_ok:
+        return ""
+
+    row_index_raw = request.values.get("row_index")
+    if row_index_raw is None:
+        return ""
+    field_name = f"exercises-{row_index_raw}-exercise"
+    exercise_raw = request.values.get(field_name)
+    if not exercise_raw:
+        return ""
+    try:
+        exercise_id = int(exercise_raw)
+    except ValueError:
+        return ""
+    if exercise_id == 0:
+        return ""
+    
+    rows = db.session.execute(
+        select(
+            Session.start_dt,
+            SessionExercise.sets,
+            SessionExercise.reps,
+            SessionExercise.weight
+        )
+        .join(SessionExercise, Session.id == SessionExercise.session_id)
+        .where(
+            Session.client_id == client_id,
+            SessionExercise.exercise_id == exercise_id
+        )
+        .order_by(Session.start_dt.desc())
+        .limit(3)
+    ).all()
+
+    return render_template("helpers/_exercise_history.html", rows=rows)
 
 
 @bp.route("/sessions/add_exercise_row")
