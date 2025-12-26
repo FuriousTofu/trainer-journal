@@ -63,7 +63,7 @@ class SessionHeaderBaseForm(FlaskForm):
         "Session Mode",
         choices=[
             ('online', 'Online'),
-            ('offline', 'Offline')
+            ('offline', 'In-person')
         ],
         default='offline',
         validators=[DataRequired(message="Session mode is required.")]
