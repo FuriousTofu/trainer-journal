@@ -85,11 +85,12 @@ class Client(db.Model):
     notes = Column(Text)
     price = Column(Integer, nullable=False)
     status = Column(
-        Enum("active", "pause", "archive", name="status_enum"),
+        Enum("active", "pause", name="status_enum"),
         nullable=False,
         default="active",
         server_default="active"
     )
+    archived_at = Column(DateTime(timezone=True), nullable=True)
 
     # Many-to-one: each client can have only one trainer
     trainer = relationship("Trainer", back_populates="clients")
