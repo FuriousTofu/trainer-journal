@@ -4,6 +4,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
 
@@ -25,8 +26,12 @@ from . import bp
 def sessions():
     stmt = (
         select(Session)
-        .where(Session.client.has(trainer_id=current_user.id))
-        .order_by(Session.start_dt)
+        .join(Session.client)
+        .where(
+            Client.trainer_id == current_user.id,
+            Client.archived_at.is_(None)
+        )
+        .order_by(Session.start_dt.desc())
     )
     sessions = db.session.execute(stmt).scalars().all()
     return render_template("sessions/sessions.html", sessions=sessions)
@@ -35,14 +40,23 @@ def sessions():
 @bp.route("/sessions/<string:session_public_id>", methods=["GET", "POST"])
 @login_required
 def session(session_public_id):
-    stmt = select(Session).where(
+    stmt = (select(Session).where(
         Session.public_id == session_public_id,
         Session.client.has(trainer_id=current_user.id)
+        )
+        .options(
+            selectinload(Session.client),
+            selectinload(Session.session_exercises).selectinload(SessionExercise.exercise)
+        )
     )
     session_obj = db.session.execute(stmt).scalars().first()
 
     if not session_obj:
         abort(404)
+
+    # Archived clients are read-only
+    if request.method == "POST" and session_obj.client.archived_at:
+        abort(403)
 
     exercise_choices = _exercise_choices(current_user.id)
 
@@ -142,6 +156,9 @@ def delete_session(session_public_id):
     if not session_obj:
         abort(404)
 
+    if session_obj.client.archived_at:
+        abort(403)
+
     try:
         db.session.delete(session_obj)
         db.session.commit()
@@ -175,7 +192,8 @@ def add_session():
         select(Client.id, Client.name, Client.public_id)
         .where(
             Client.trainer_id == current_user.id,
-            Client.status == "active"
+            Client.status == "active",
+            Client.archived_at.is_(None)
         )
         .order_by(Client.name)
     ).all()
@@ -214,6 +232,8 @@ def add_session():
         client = db.session.get(Client, form.client.data)
         if not client or client.trainer_id != current_user.id:
             abort(404)
+        if client.archived_at:
+            abort(403)
 
         try:
             s = Session(

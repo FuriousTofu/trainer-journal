@@ -1,0 +1,87 @@
+<div class="session-archived-wrapper mx-auto">
+    <h2 class="h2">
+        Session with
+        <a href="{{ url_for('.client', client_public_id=session.client.public_id) }}"
+        class="link-primary text-decoration-none">
+            {{ session.client.name }}
+        </a>
+        on {{ session.start_dt|dt_no_seconds }}
+        <span class="text-muted">(client archived)</span>
+    </h2>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            Session details
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted">Start</span>
+                <span>{{ session.start_dt|dt_no_seconds }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted">Status</span>
+                <span>{{ session.status }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted">Payment</span>
+                <span>{{ "Paid" if session.is_paid else "Not paid" }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted">Duration</span>
+                <span>{{ session.duration_min }} min</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted">Mode</span>
+                <span>{{ session.mode }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted">Price</span>
+                <span>{{ session.price }}</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            Exercises
+        </div>
+
+        {% if session.session_exercises and session.session_exercises|length > 0 %}
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Exercise</th>
+                            <th class="text-start">Sets</th>
+                            <th class="text-start">Reps</th>
+                            <th class="text-start">Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for se in session.session_exercises %}
+                            <tr>
+                                <td class="text-start">{{ se.exercise.name }}</td>
+                                <td class="text-start">{{ se.sets }}</td>
+                                <td class="text-start">{{ se.reps }}</td>
+                                <td class="text-start">{{ se.weight }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="card-body text-muted">
+                No exercises recorded.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            Notes
+        </div>
+        <div class="card-body" style="white-space: pre-wrap;">
+            {{ session.notes or "—" }}
+        </div>
+    </div>
+</div>
