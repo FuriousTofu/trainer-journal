@@ -1,20 +1,19 @@
 {% extends "layout.html" %}
-{% from "macros/badges.html" import status_badge %}
 
-{% block title %}Clients{% endblock %}
+{% block title %}Archived Clients{% endblock %}
 
 {% block main %}
     <div class="d-flex justify-content-center gap-3 mb-3">
-        <h2>Your clients list</h2>
-        <a href="{{ url_for('.add_client') }}" class="btn btn-outline-primary mb-3">
-            <i class="bi bi-plus-circle"></i> Add Client
+        <h2>Your archived clients</h2>
+        <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary mb-3">
+            <i class="bi bi-arrow-return-left"></i> Back
         </a>
     </div>
     {% if clients|length == 0 %}
     <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
         <div class="card shadow-sm border-0 text-center p-4" style="width: 300px;">
             <i class="bi bi-info-circle fs-1 mb-2"></i>
-            <div>You have no clients yet.<br>Please add some to activate this view.</div>
+            <div>You have no archived clients.</div>
         </div>  
     </div>   
     {% else %}
@@ -23,31 +22,36 @@
                 <tr>
                     <th class="text-start">Name</th>
                     <th class="text-start">Contact</th>
-                    <th class="text-start">Status</th>
                     <th class="text-end">Price</th>
+                    <th class="text-end">Last Session</th>
                 </tr>
             </thead>
             <tbody>
                 {% for client in clients %}
                     <tr 
                         class="table-row-link"
-                        data-url="{{ url_for('.client', client_public_id=client.public_id) }}">
+                        data-url="{{ url_for('.client', client_public_id=client.public_id) }}"
+                        {% if client.notes %}
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="right"
+                            title="{{ client.notes }}"
+                        {% endif %}>
                         <td class="text-start">{{ client.name }}</td>
                         <td class="text-start">{{ client.contact }}</td>
-                        <td class="text-start">
-                            {{ status_badge(client.status) }}</td>
                         <td class="text-end">{{ client.price}}</td>
+                        <td class="text-end">
+                            {% if client.last_session_dt %}
+                                {{ client.last_session_dt|dt_no_seconds("%d.%m.%Y") }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
                         </tr>
                 {% endfor %}
-                {% block scripts %}
-                    <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
-                {% endblock %}
             </tbody>
         </table>
     {% endif %}
-        <div class="d-flex justify-content-center align-items-left" style="width: 350px;">
-            <p class="mt-2">
-                <a href="{{ url_for('.archived_clients') }}" class="auth-link">Archieved clients</a>
-            </p>
-        </div>
+    {% block scripts %}
+        <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
+    {% endblock %}
 {% endblock %}

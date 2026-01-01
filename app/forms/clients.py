@@ -29,8 +29,7 @@ class AddClientForm(FlaskForm):
         "Status",
         choices=[
             ('active', 'Active'),
-            ('pause', 'On Pause'),
-            ('archive', 'Archived')
+            ('pause', 'On Pause')
         ],
         default='active',
         validators=[DataRequired(message="Status is required.")]

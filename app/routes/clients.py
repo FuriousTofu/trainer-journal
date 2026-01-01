@@ -1,6 +1,7 @@
-from flask import abort, render_template, redirect, url_for, flash
+from datetime import datetime, timezone
+from flask import abort, render_template, redirect, request, url_for, flash
 from flask_login import login_required, current_user
-from sqlalchemy import select
+from sqlalchemy import exists, func, select
 from sqlalchemy.exc import IntegrityError
 
 from app import db
@@ -10,12 +11,38 @@ from app.forms import AddClientForm
 from . import bp
 
 
-@bp.route("/clients", methods=["GET", "POST"])
+@bp.route("/clients", methods=["GET"])
 @login_required
 def clients():
-    stmt = select(Client).where(Client.trainer_id == current_user.id)
+    stmt = select(Client).where(
+        Client.trainer_id == current_user.id,
+        Client.archived_at == None)
     clients = db.session.execute(stmt).scalars().all()
     return render_template("clients/clients.html", clients=clients)
+
+
+@bp.route("/clients/archive", methods=["GET"])
+@login_required
+def archived_clients():
+    last_dt = func.max(Session.start_dt).label("last_session_dt")
+
+    stmt = (
+        select(Client, last_dt)
+        .outerjoin(Session, Session.client_id == Client.id)
+        .where(
+            Client.trainer_id == current_user.id,
+            Client.archived_at != None
+        )
+        .group_by(Client.id)
+        .order_by(Client.name)
+    )
+
+    rows = db.session.execute(stmt).all()
+    clients = []
+    for client, last_session_dt in rows:
+        client.last_session_dt = last_session_dt
+        clients.append(client)
+    return render_template("clients/archived_clients.html", clients=clients)
 
 
 @bp.route("/clients/add", methods=["GET", "POST"])
@@ -65,6 +92,9 @@ def client(client_public_id):
 
     if not client:
         abort(404)
+        
+    if request.method == "POST" and client.archived_at:
+        abort(403)
 
     stmt = (
         select(Session)
@@ -95,3 +125,99 @@ def client(client_public_id):
         form=form,
         sessions=sessions
     )
+
+@bp.route("/clients/<string:client_public_id>/archive", methods=["POST"])
+@login_required
+def archive_client(client_public_id):
+    stmt = select(Client).where(
+        Client.public_id == client_public_id,
+        Client.trainer_id == current_user.id,
+        Client.archived_at.is_(None)
+    )
+    client = db.session.execute(stmt).scalars().first()
+
+    if not client:
+        abort(404)
+
+    planned_session = db.session.scalar(
+        select(
+            exists().where(
+                Session.client_id == client.id,
+                Session.status == "planned"
+            )
+        )
+    )
+
+    if planned_session:
+        flash("Сlient with planned sessions cannot be archived.", "danger")
+        return redirect(url_for(".client", client_public_id=client.public_id))
+
+    client.archived_at = datetime.now(timezone.utc)
+    try:
+        db.session.commit()
+        flash("Client archived successfully", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error archiving client. Please try again.", "danger")
+
+    return redirect(url_for(".client", client_public_id=client.public_id))
+
+
+@bp.route("/clients/<string:client_public_id>/unarchive", methods=["POST"])
+@login_required
+def unarchive_client(client_public_id):
+    stmt = select(Client).where(
+        Client.public_id == client_public_id,
+        Client.trainer_id == current_user.id,
+        Client.archived_at.isnot(None)
+    )
+    client = db.session.execute(stmt).scalars().first()
+
+    if not client:
+        abort(404)
+
+    client.archived_at = None
+    try:
+        db.session.commit()
+        flash("Client unarchived successfully", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error unarchiving client. Please try again.", "danger")
+
+    return redirect(url_for(".client", client_public_id=client.public_id))
+
+
+@bp.route("/clients/<string:client_public_id>/delete", methods=["POST"])
+@login_required
+def delete_client(client_public_id):
+    stmt = select(Client).where(
+        Client.public_id == client_public_id,
+        Client.trainer_id == current_user.id
+    )
+    client = db.session.execute(stmt).scalars().first()
+
+    if not client:
+        abort(404)
+
+    planned_session = db.session.scalar(
+        select(
+            exists().where(
+                Session.client_id == client.id,
+                Session.status == "planned"
+            )
+        )
+    )
+
+    if planned_session:
+        flash("Сlient with planned sessions cannot be deleted.", "danger")
+        return redirect(url_for(".client", client_public_id=client.public_id))
+
+    db.session.delete(client)
+    try:
+        db.session.commit()
+        flash("Client deleted successfully", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error deleting client. Please try again.", "danger")
+
+    return redirect(url_for(".clients"))

@@ -1,0 +1,177 @@
+<div class="d-flex justify-content-between align-items-start" style="max-width: 680px; margin: 0 auto;">
+    <h2 class="h2">{{ client.name }}</h2>
+    <div class="d-flex justify-content-center align-items-center gap-2" >
+        <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-return-left"></i> Clients
+        </a>
+
+        <button type="submit" form="client-edit-form" class="btn btn-primary">
+            Save changes
+        </button>
+
+        <div class="dropdown">
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                title="Actions"
+            >
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+                {% if client.archived_at %}
+                <li>
+                    <form method="post"
+                        action="{{ url_for('.unarchive_client', client_public_id=client.public_id) }}"
+                        class="m-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item">
+                        Unarchive
+                    </button>
+                    </form>
+                </li>
+                {% else %}
+                <li>
+                    <form method="post"
+                        action="{{ url_for('.archive_client', client_public_id=client.public_id) }}"
+                        class="m-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item">
+                        Archive
+                    </button>
+                    </form>
+                </li>
+                {% endif %}
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                <form method="post"
+                        action="{{ url_for('.delete_client', client_public_id=client.public_id) }}"
+                        onsubmit="return confirm('Delete this client AND all related sessions? This can’t be undone.');"
+                        class="m-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item text-danger">
+                        Delete
+                    </button>
+                </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<form method="post" novalidate class="add-form" id="client-edit-form">
+    {{ form.hidden_tag() }}
+
+    <div class="row g-2 mb-2">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                {{ form.name(class="form-control", placeholder="Client Name") }}
+                {{ form.name.label(class="form-label") }}
+                {% for error in form.name.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                {{ form.status(class="form-select", placeholder="Client Status") }}
+                {{ form.status.label(class="form-label") }}
+                {% for error in form.status.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-2">
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                {{ form.price(class="form-control", placeholder="Session Price") }}
+                {{ form.price.label(class="form-label") }}
+                {% for error in form.price.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-floating mb-2">
+                {{ form.contact(class="form-control", placeholder="Contact Information (Optional)") }}
+                {{ form.contact.label(class="form-label") }}
+                {% for error in form.contact.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-floating mb-2">
+        {{ form.notes(class="form-control", placeholder="Notes (Optional)") }}
+        {{ form.notes.label(class="form-label") }}
+        {% for error in form.notes.errors %}
+            <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+    </div>
+</form>
+
+<div class="d-flex justify-content-center gap-3 mb-3">
+    <h3 class="h3">{{ client.name }}'s Sessions</h3>
+
+    {% if client.status == "active" %}
+        <button
+            type="button"
+            class="btn btn-outline-primary mb-3 js-go"
+            data-url="{{ url_for('.add_session', client_public_id=client.public_id) }}">
+            <i class="bi bi-plus-circle"></i> Add Session
+        </button>
+    {% else %}
+        <span
+            class="d-inline-block mb-3"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Sessions can be created only for active clients.">
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                disabled>
+                <i class="bi bi-plus-circle"></i> Add Session
+            </button>
+        </span>
+    {% endif %}
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th class="text-start">Start</th>
+            <th class="text-start">Mode</th>
+            <th class="text-start">Status</th>
+            <th class="text-start">Payment</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for session in sessions %}
+            <tr
+                class="table-row-link"
+                data-url="{{ url_for('.session', session_public_id=session.public_id) }}">
+                <td class="text-start">
+                    {{ session.start_dt|dt_no_seconds }}
+                </td>
+                <td class="text-start">
+                    {{ mode_badge(session.mode) }}
+                </td>
+                <td class="text-start">
+                    {{ session_status_badge(session.status) }}
+                </td>
+                <td class="text-start">
+                    {{ paid_badge(session.is_paid) }}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
