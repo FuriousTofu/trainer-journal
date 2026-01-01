@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ exercise.name | capitalize }}
+{% endblock %}
+
+{% block main %}
+    <h2 class="h2">Edit exercise</h2>
+    <form method="post" action="{{ url_for('.exercise', exercise_id=exercise.id) }}" novalidate class="add-form">
+        {{ form.hidden_tag() }}
+        <div class="form-floating mb-2">
+            {{ form.name(class="form-control", placeholder="Exercise Name") }}
+            {{ form.name.label(class="form-label") }}
+            {% for error in form.name.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-floating mb-2">
+            {{ form.description(class="form-control", placeholder="Exercise Description") }}
+            {{ form.description.label(class="form-label") }}
+            {% for error in form.description.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <a href="{{ url_for('.exercises') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-return-left"></i> Exercises
+            </a>
+            {{ form.submit(class="btn btn-primary px-3") }}
+        </div>
+    </form>
+{% endblock %}

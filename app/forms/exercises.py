@@ -3,7 +3,7 @@ from wtforms import StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Length
 
 
-class AddExerciseForm(FlaskForm):
+class ExerciseForm(FlaskForm):
     name = StringField(
         "Exercise Name",
         validators=[
@@ -23,4 +23,11 @@ class AddExerciseForm(FlaskForm):
             )
         ]
     )
+
+
+class AddExerciseForm(ExerciseForm):
     submit = SubmitField("Add Exercise")
+
+
+class EditExerciseForm(ExerciseForm):
+    submit = SubmitField("Save Changes")
