@@ -191,6 +191,7 @@ class Exercise(db.Model):
     )
     description = Column(Text)
 
+    session_exercises = relationship("SessionExercise", back_populates="exercise")
     trainer = relationship("Trainer", back_populates="exercises")
 
     # UniqueConstraint - exercise names must be unique per trainer
@@ -236,3 +237,4 @@ class SessionExercise(db.Model):
     )
 
     session = relationship("Session", back_populates="session_exercises")
+    exercise = relationship("Exercise", back_populates="session_exercises")
