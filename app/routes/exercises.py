@@ -4,7 +4,7 @@ from sqlalchemy import exists, func, select
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.models import Exercise
+from app.models import Exercise, SessionExercise
 from app.forms import AddExerciseForm, EditExerciseForm
 
 from . import bp
@@ -13,9 +13,25 @@ from . import bp
 @bp.route("/exercises", methods=["GET", "POST"])
 @login_required
 def exercises():
-    stmt = select(Exercise).where(Exercise.trainer_id == current_user.id)
+    stmt = select(Exercise).where(
+        Exercise.trainer_id == current_user.id,
+        Exercise.is_active.is_(True)
+    ).order_by(Exercise.name)
     exercises = db.session.execute(stmt).scalars().all()
+
     return render_template("exercises/exercises.html", exercises=exercises)
+
+
+@bp.route("/exercises/archived", methods=["GET"])
+@login_required
+def archived_exercises():
+    stmt = select(Exercise).where(
+        Exercise.trainer_id == current_user.id,
+        Exercise.is_active.is_(False)
+    ).order_by(Exercise.name)
+    exercises = db.session.execute(stmt).scalars().all()
+
+    return render_template("exercises/archived_exercises.html", exercises=exercises)
 
 
 @bp.route("/exercises/add", methods=["GET", "POST"])
@@ -71,12 +87,13 @@ def exercise(exercise_id):
     stmt = select(Exercise).where(
         Exercise.id == exercise_id,
         Exercise.trainer_id == current_user.id,
-        Exercise.is_active.is_(True)
     )
     exercise = db.session.execute(stmt).scalars().first()
 
     if not exercise:
         abort(404)
+
+    exercise_used = _exercise_used_in_sessions(exercise.id)
     
     form = EditExerciseForm(obj=exercise)
     if form.validate_on_submit():
@@ -115,7 +132,10 @@ def exercise(exercise_id):
                 form.name.errors.append(
                     "An exercise with this name already exists."
                 )
-    return render_template("exercises/exercise.html", exercise=exercise, form=form)
+    return render_template(
+        "exercises/exercise.html", exercise=exercise,
+        form=form, exercise_used=exercise_used
+    )
 
 
 @bp.route("/exercises/<int:exercise_id>/archive", methods=["POST"])
@@ -180,13 +200,7 @@ def delete_exercise(exercise_id):
     if not exercise:
         abort(404)
 
-    used_in_any_session = db.session.scalar(
-        select(
-            exists().where(SessionExercise.exercise_id == exercise.id)
-        )
-    )
-
-    if used_in_any_session:
+    if _exercise_used_in_sessions(exercise.id):
         flash("Exercise used in sessions cannot be deleted. Archive it instead.", "danger")
         return redirect(url_for(".exercise", exercise_id=exercise.id))
 
@@ -200,3 +214,10 @@ def delete_exercise(exercise_id):
         flash("Error deleting exercise. Please try again.", "danger")
 
     return redirect(url_for(".exercises"))
+
+
+def _exercise_used_in_sessions(exercise_id: int) -> bool:
+    stmt = select(
+        exists().where(SessionExercise.exercise_id == exercise_id)
+    )
+    return bool(db.session.scalar(stmt))

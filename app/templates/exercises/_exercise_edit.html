@@ -1,0 +1,40 @@
+<div style="max-width: 680px; margin: 0 auto;">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h2 class="h2 mb-0">{{ exercise.name }}</h2>
+        </div>
+        <div class="d-flex justify-content-center align-items-center gap-2" >
+            <a href="{{ url_for('.exercises') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-return-left"></i> Exercises
+            </a>
+            <button type="submit" form="exercise-edit-form" class="btn btn-primary px-3">
+                Save Changes
+            </button>
+            {% include "exercises/_exercise_actions_dropdown.html" %}
+        </div>
+    </div>
+    <form
+        id="exercise-edit-form"
+        method="post"
+        action="{{ url_for('.exercise', exercise_id=exercise.id) }}"
+        novalidate
+    >
+        {{ form.hidden_tag() }}
+
+        <div class="form-floating mb-2">
+            {{ form.name(class="form-control", placeholder="Exercise Name") }}
+            {{ form.name.label(class="form-label") }}
+            {% for error in form.name.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-floating mb-2">
+            {{ form.description(class="form-control", placeholder="Exercise Description") }}
+            {{ form.description.label(class="form-label") }}
+            {% for error in form.description.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </form>
+</div>

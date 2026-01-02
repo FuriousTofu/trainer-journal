@@ -1,0 +1,68 @@
+<div class="dropdown">
+    <button
+        type="button"
+        class="btn btn-outline-secondary"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+        title="Actions"
+    >
+        <i class="bi bi-three-dots-vertical"></i>
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end">
+
+        {% if exercise.is_active %}
+            <li>
+                <form method="post"
+                      action="{{ url_for('.archive_exercise', exercise_id=exercise.id) }}"
+                      class="m-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item">
+                        Archive
+                    </button>
+                </form>
+            </li>
+        {% else %}
+            <li>
+                <form method="post"
+                      action="{{ url_for('.unarchive_exercise', exercise_id=exercise.id) }}"
+                      class="m-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item">
+                        Unarchive
+                    </button>
+                </form>
+            </li>
+        {% endif %}
+
+        <li><hr class="dropdown-divider"></li>
+
+        {% if exercise_used %}
+            <li>
+                <span
+                    class="dropdown-item disabled"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                    data-bs-container="body"
+                    title="This exercise is used in sessions and can’t be deleted."
+                    style="cursor: help; pointer-events: auto;"
+                >
+                    Delete
+                </span>
+            </li>
+        {% else %}
+            <li>
+                <form method="post"
+                      action="{{ url_for('.delete_exercise', exercise_id=exercise.id) }}"
+                      onsubmit="return confirm('Delete this exercise? This can’t be undone.');"
+                      class="m-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item text-danger">
+                        Delete
+                    </button>
+                </form>
+            </li>
+        {% endif %}
+
+    </ul>
+</div>
