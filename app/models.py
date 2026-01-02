@@ -50,7 +50,7 @@ class Trainer(db.Model, UserMixin):
     exercises = relationship(
         "Exercise",
         back_populates="trainer",
-        cascade="all, delete-orphan",
+        cascade="all",
         passive_deletes=True
     )
 

@@ -116,3 +116,87 @@ def exercise(exercise_id):
                     "An exercise with this name already exists."
                 )
     return render_template("exercises/exercise.html", exercise=exercise, form=form)
+
+
+@bp.route("/exercises/<int:exercise_id>/archive", methods=["POST"])
+@login_required
+def archive_exercise(exercise_id):
+    stmt = select(Exercise).where(
+        Exercise.id == exercise_id,
+        Exercise.trainer_id == current_user.id,
+        Exercise.is_active.is_(True)
+    )
+    exercise = db.session.execute(stmt).scalars().first()
+
+    if not exercise:
+        abort(404)
+
+    exercise.is_active = False
+
+    try:
+        db.session.commit()
+        flash("Exercise archived successfully", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error archiving exercise. Please try again.", "danger")
+
+    return redirect(url_for(".exercise", exercise_id=exercise.id))
+
+
+@bp.route("/exercises/<int:exercise_id>/unarchive", methods=["POST"])
+@login_required
+def unarchive_exercise(exercise_id):
+    stmt = select(Exercise).where(
+        Exercise.id == exercise_id,
+        Exercise.trainer_id == current_user.id,
+        Exercise.is_active.is_(False)
+    )
+    exercise = db.session.execute(stmt).scalars().first()
+
+    if not exercise:
+        abort(404)
+
+    exercise.is_active = True
+
+    try:
+        db.session.commit()
+        flash("Exercise unarchived successfully", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error unarchiving exercise. Please try again.", "danger")
+
+    return redirect(url_for(".exercise", exercise_id=exercise.id))
+
+
+@bp.route("/exercises/<int:exercise_id>/delete", methods=["POST"])
+@login_required
+def delete_exercise(exercise_id):
+    stmt = select(Exercise).where(
+        Exercise.id == exercise_id,
+        Exercise.trainer_id == current_user.id
+    )
+    exercise = db.session.execute(stmt).scalars().first()
+
+    if not exercise:
+        abort(404)
+
+    used_in_any_session = db.session.scalar(
+        select(
+            exists().where(SessionExercise.exercise_id == exercise.id)
+        )
+    )
+
+    if used_in_any_session:
+        flash("Exercise used in sessions cannot be deleted. Archive it instead.", "danger")
+        return redirect(url_for(".exercise", exercise_id=exercise.id))
+
+    db.session.delete(exercise)
+
+    try:
+        db.session.commit()
+        flash("Exercise deleted successfully", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error deleting exercise. Please try again.", "danger")
+
+    return redirect(url_for(".exercises"))
