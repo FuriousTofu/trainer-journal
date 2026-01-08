@@ -72,3 +72,17 @@ body {
 .tj-form-field--switch .form-check-input {
   transform: scale(1.55);
 }
+
+.ts-wrapper .ts-control {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+}
+
+.ts-wrapper.focus .ts-control {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+}
