@@ -1,34 +1,38 @@
-/**
- * Initialize TomSelect for exercise selects inside session forms.
- * Works for:
- * - Add Session (empty rows)
- * - Edit Session (pre-filled rows)
- * - HTMX dynamically added rows
- */
-function initExerciseSelects(root = document) {
-    root.querySelectorAll(".js-exercise-select").forEach((el) => {
-        if (el.tomselect) return;
+(function() {
+    "use strict";
 
-        new TomSelect(el, {
-            placeholder: "Select exercise...",
-            closeAfterSelect: true,
-            maxItems: 1,
-            highlight: true,
+    /**
+     * Initialize TomSelect for exercise selects inside session forms.
+     * Skips elements that already have TomSelect initialized.
+     */
+    function initExerciseSelects() {
+        document.querySelectorAll("select.js-exercise-select").forEach((el) => {
+            if (el.tomselect) return;
 
-        // Re-trigger native change event for HTMX
-            onChange: () => {
-                htmx.trigger(el, "change");
-            }
+            new TomSelect(el, {
+                placeholder: "Select exercise...",
+                closeAfterSelect: true,
+                maxItems: 1,
+                highlight: true,
+                onChange: () => {
+                    htmx.trigger(el, "change");
+                }
+            });
         });
+    }
+
+    // Initial page load
+    document.addEventListener("DOMContentLoaded", () => {
+        initExerciseSelects();
     });
-}
 
-// Initial page load
-document.addEventListener("DOMContentLoaded", () => {
-    initExerciseSelects();
-});
-
-// HTMX: after new exercise row is added
-document.body.addEventListener("htmx:afterSwap", (event) => {
-    initExerciseSelects(event.target);
-});
+    // Handle add/remove exercise clicks - wait for HTMX to complete then init
+    document.body.addEventListener("click", (event) => {
+        if (event.target.closest(".js-add-exercise") || event.target.closest(".js-remove-exercise")) {
+            // Wait for HTMX to complete the swap (500ms should be enough)
+            setTimeout(() => {
+                initExerciseSelects();
+            }, 500);
+        }
+    });
+})();
