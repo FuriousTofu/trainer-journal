@@ -17,15 +17,30 @@
                     Unarchive
                 </button>
             </form>
-            <form method="post"
+            {% if exercise_used %}
+                <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    disabled
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-container="body"
+                    title="This exercise is used in sessions and can’t be deleted."
+                    style="cursor: help; pointer-events: auto;"
+                >
+                    Delete
+                </button>
+            {% else %}
+                <form method="post"
                     action="{{ url_for('.delete_exercise', exercise_id=exercise.id) }}"
                     onsubmit="return confirm('Delete this exercise? This can’t be undone.');"
                     class="m-0">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-outline-danger">
-                    Delete
-                </button>
-            </form>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-danger">
+                        Delete
+                    </button>
+                </form>
+            {% endif %}
         </div>
     </div>
     <div class="card mb-3">
