@@ -12,7 +12,7 @@ class AddSessionExerciseForm(Form):
 
     exercise = SelectField(
         "Exercise",
-        coerce=int,
+        coerce=lambda x: int(x) if x else 0, # Handle empty selection
         choices=[],
         validators=[
             DataRequired(message="Exercise is required."),

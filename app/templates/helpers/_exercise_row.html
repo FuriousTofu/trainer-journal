@@ -2,11 +2,9 @@
 {% set remove_url = url_for('.remove_exercise_row') %}
 <div class="row g-2 mb-2" data-index="{{ index }}">
     <div class ="col-md-4">
-        <div class="form-floating">
+        <div>
             {{ subform.exercise(**{
-                "class": "form-select",
-                "placeholder": "Select Exercise",
-
+                "class": "js-exercise-select",
                 "hx-get": url_for(".exercise_history"),
                 "hx-trigger": "change",
                 "hx-target": "#ex-history-" ~ index,
@@ -14,7 +12,6 @@
                 "hx-vals": '{"row_index": "' ~ index ~ '"}',
                 "hx-swap": "innerHTML"
             }) }}
-            {{ subform.exercise.label(class="form-label") }}
             {% for error in subform.exercise.errors %}
                 <div class="text-danger small">{{ error }}</div>
             {% endfor %}
