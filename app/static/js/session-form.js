@@ -1,12 +1,8 @@
 (function() {
     "use strict";
 
-    /**
-     * Initialize TomSelect for exercise selects inside session forms.
-     * Skips elements that already have TomSelect initialized.
-     */
-    function initExerciseSelects() {
-        document.querySelectorAll("select.js-exercise-select").forEach((el) => {
+    function initExerciseSelects(container = document) {
+        container.querySelectorAll("select.js-exercise-select").forEach((el) => {
             if (el.tomselect) return;
 
             new TomSelect(el, {
@@ -26,13 +22,26 @@
         initExerciseSelects();
     });
 
-    // Handle add/remove exercise clicks - wait for HTMX to complete then init
     document.body.addEventListener("click", (event) => {
-        if (event.target.closest(".js-add-exercise") || event.target.closest(".js-remove-exercise")) {
-            // Wait for HTMX to complete the swap (500ms should be enough)
-            setTimeout(() => {
-                initExerciseSelects();
-            }, 500);
+        const addBtn = event.target.closest(".js-add-exercise");
+        const removeBtn = event.target.closest(".js-remove-exercise");
+
+        if (addBtn) {
+            document.body.addEventListener("htmx:afterSwap", function handleAdd(e) {
+                if (e.detail.target.id === "exercise-wrapper") {
+                    initExerciseSelects(e.detail.target);
+                    document.body.removeEventListener("htmx:afterSwap", handleAdd);
+                }
+            });
+        }
+        // Used afterSettle because with afterSwap default select elements are not hidden properly yet
+        if (removeBtn) {
+            document.body.addEventListener("htmx:afterSettle", function handleRemove(e) {
+                if (e.detail.target.id === "exercise-wrapper") {
+                    initExerciseSelects(e.detail.target);
+                    document.body.removeEventListener("htmx:afterSettle", handleRemove);
+                }
+            });
         }
     });
 })();
