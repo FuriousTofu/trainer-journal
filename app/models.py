@@ -25,7 +25,7 @@ class Trainer(db.Model, UserMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
-    password_hash = Column(String(128), nullable=False)
+    password_hash = Column(String(256), nullable=False)
 
     # For displaying sessions in calendars/exports
     timezone = Column(String(50), default="Europe/Kyiv", server_default="Europe/Kyiv")
