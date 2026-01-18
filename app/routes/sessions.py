@@ -103,19 +103,16 @@ def session(session_public_id):
 
                 for entry in exercises_form.exercises:
                     sub = entry.form
+                    ex = _get_or_create_exercise(sub.exercise.data, current_user.id)
+                    if not ex:
+                        continue  # Skip empty entries
 
-                    ex = db.session.get(Exercise, sub.exercise.data)
-                    if not ex or ex.trainer_id != current_user.id:
-                        abort(404)
-                    
-                    weight=sub.weight.data
-                    if weight is None:
-                        weight = 0
-                    
+                    weight = sub.weight.data if sub.weight.data is not None else 0
+
                     se = SessionExercise(
                         session_id=session_obj.id,
                         client_id=session_obj.client_id,
-                        exercise_id=sub.exercise.data,
+                        exercise_id=ex.id,
                         sets=sub.sets.data,
                         reps=sub.reps.data,
                         weight=weight,
@@ -244,19 +241,16 @@ def add_session():
 
             for exercise_form in form.exercises:
                 sub = exercise_form.form
+                ex = _get_or_create_exercise(sub.exercise.data, current_user.id)
+                if not ex:
+                    continue  # Skip empty entries
 
-                ex = db.session.get(Exercise, sub.exercise.data)
-                if not ex or ex.trainer_id != current_user.id:
-                    abort(404)
-                
-                weight=sub.weight.data
-                if weight is None:
-                    weight = 0
+                weight = sub.weight.data if sub.weight.data is not None else 0
 
                 se = SessionExercise(
                     session_id=s.id,
                     client_id=s.client_id,
-                    exercise_id=sub.exercise.data,
+                    exercise_id=ex.id,
                     sets=sub.sets.data,
                     reps=sub.reps.data,
                     weight=weight,
@@ -468,6 +462,44 @@ def client_price():
     return render_template("helpers/_price_field.html", form=form)
 
 
+def _get_or_create_exercise(exercise_value: str, trainer_id: int) -> Exercise:
+    """
+    Get existing exercise by ID or create new one by name.
+    Returns Exercise object or None if should be skipped.
+    """
+    try:
+        exercise_id = int(exercise_value)
+        ex = db.session.get(Exercise, exercise_id)
+        if not ex or ex.trainer_id != trainer_id:
+            abort(404)
+        return ex
+    except (ValueError, TypeError):
+        # New exercise created via TomSelect - exercise_value is the name
+        exercise_name = str(exercise_value).strip()
+        if not exercise_name:
+            return None  # Skip empty entries
+
+        # Check if exercise with this name already exists for this trainer
+        ex = db.session.execute(
+            select(Exercise).where(
+                Exercise.trainer_id == trainer_id,
+                Exercise.name == exercise_name
+            )
+        ).scalar_one_or_none()
+
+        if not ex:
+            # Create new exercise
+            ex = Exercise(
+                trainer_id=trainer_id,
+                name=exercise_name,
+                is_active=True
+            )
+            db.session.add(ex)
+            db.session.flush()  # Get the ID
+
+        return ex
+
+
 def _exercise_choices(user_id: int):
     """Get exercise choices for select fields."""
     exercises = db.session.execute(
@@ -479,7 +511,7 @@ def _exercise_choices(user_id: int):
         .order_by(Exercise.name)
     ).all()
     return [("", "")] + [
-        (e.id, e.name) for e in exercises
+        (str(e.id), e.name) for e in exercises
     ]
 
 
