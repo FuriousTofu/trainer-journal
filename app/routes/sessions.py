@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from app import db
 from app.models import (
@@ -68,6 +69,7 @@ def session(session_public_id):
 
     else:
         header_form = EditSessionForm(obj=session_obj)
+        header_form.start_dt.data = _utc_to_local(session_obj.start_dt)
         exercises_form = SessionExercisesHelperForm()
         for se in session_obj.session_exercises:
             entry = exercises_form.exercises.append_entry({
@@ -87,6 +89,7 @@ def session(session_public_id):
         if header_ok and exercises_ok:
             paid_status = session_obj.is_paid
             header_form.populate_obj(session_obj)
+            session_obj.start_dt = _local_to_utc(session_obj.start_dt)
             if session_obj.is_paid:
                 if not paid_status and session_obj.payment_date is None:
                     session_obj.payment_date = datetime.now(timezone.utc)
@@ -209,17 +212,7 @@ def add_session():
         form.client.data = preselected.id
         form.price.data = db.session.get(Client, preselected.id).price
 
-    exercises = db.session.execute(
-        select(Exercise.id, Exercise.name)
-        .where(
-            Exercise.trainer_id == current_user.id,
-            Exercise.is_active.is_(True)
-        )
-        .order_by(Exercise.name)
-    ).all()
-    exercise_choices = [(0, "Select Exercise")] + [
-        (e.id, e.name) for e in exercises
-    ]
+    exercise_choices = _exercise_choices(current_user.id)
     has_exercises = len(exercise_choices) > 1
 
     if request.method == "GET" and not form.exercises:
@@ -238,7 +231,7 @@ def add_session():
         try:
             s = Session(
                 client_id=form.client.data,
-                start_dt=form.start_dt.data,
+                start_dt=_local_to_utc(form.start_dt.data),
                 duration_min=form.duration_min.data,
                 mode=form.mode.data,
                 price=form.price.data,
@@ -305,6 +298,7 @@ def add_session():
 @bp.route("/sessions/exercise_history", methods=["GET"])
 @login_required
 def exercise_history():
+    """Last sets/reps/weight for given client and exercise (HTMX request)."""
     if not request.headers.get("HX-Request"):
         abort(404)
     client_raw = request.values.get("client")
@@ -348,7 +342,8 @@ def exercise_history():
         .join(SessionExercise, Session.id == SessionExercise.session_id)
         .where(
             Session.client_id == client_id,
-            SessionExercise.exercise_id == exercise_id
+            SessionExercise.exercise_id == exercise_id,
+            Session.status == "done"
         )
         .order_by(Session.start_dt.desc())
         .limit(3)
@@ -366,17 +361,7 @@ def exercise_row():
     form = AddSessionForm(formdata=request.args)
     subform = form.exercises.append_entry()
 
-    exercises = db.session.execute(
-        select(Exercise.id, Exercise.name)
-        .where(
-            Exercise.trainer_id == current_user.id,
-            Exercise.is_active.is_(True)
-        )
-        .order_by(Exercise.name)
-    ).all()
-    exercise_choices = [(0, "Select Exercise")] + [
-        (e.id, e.name) for e in exercises
-    ]
+    exercise_choices = _exercise_choices(current_user.id)
     subform.exercise.choices = exercise_choices
 
     return render_template(
@@ -452,17 +437,7 @@ def remove_exercise_row():
         new_sub.form.reps.data = sub.form.reps.data
         new_sub.form.weight.data = sub.form.weight.data
 
-    exercises = db.session.execute(
-        select(Exercise.id, Exercise.name)
-        .where(
-            Exercise.trainer_id == current_user.id,
-            Exercise.is_active.is_(True)
-        )
-        .order_by(Exercise.name)
-    ).all()
-    exercise_choices = [(0, "Select Exercise")] + [
-        (e.id, e.name) for e in exercises
-    ]
+    exercise_choices = _exercise_choices(current_user.id)
     for sub in new_form.exercises:
         sub.form.exercise.choices = exercise_choices
 
@@ -475,6 +450,7 @@ def remove_exercise_row():
 @bp.route("/sessions/client-price")
 @login_required
 def client_price():
+    """Get client price for HTMX request."""
     if not request.headers.get("HX-Request"):
         abort(404)
     client_id = request.args.get("client", type=int)
@@ -493,6 +469,7 @@ def client_price():
 
 
 def _exercise_choices(user_id: int):
+    """Get exercise choices for select fields."""
     exercises = db.session.execute(
         select(Exercise.id, Exercise.name)
         .where(
@@ -501,6 +478,22 @@ def _exercise_choices(user_id: int):
         )
         .order_by(Exercise.name)
     ).all()
-    return [(0, "Select Exercise")] + [
+    return [("", "")] + [
         (e.id, e.name) for e in exercises
     ]
+
+
+def _local_to_utc(naive_dt: datetime, tz_name: str = "Europe/Kyiv") -> datetime:
+    """Convert naive local datetime to UTC."""
+    local_tz = ZoneInfo(tz_name)
+    local_dt = naive_dt.replace(tzinfo=local_tz)
+    return local_dt.astimezone(timezone.utc)
+
+
+def _utc_to_local(dt: datetime, tz_name: str = "Europe/Kyiv") -> datetime:
+    """Convert UTC datetime to naive local datetime for form display."""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    local_tz = ZoneInfo(tz_name)
+    local_dt = dt.astimezone(local_tz)
+    return local_dt.replace(tzinfo=None)  # Form expects naive datetime
