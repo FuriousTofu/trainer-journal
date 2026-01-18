@@ -12,11 +12,11 @@ class AddSessionExerciseForm(Form):
 
     exercise = SelectField(
         "Exercise",
-        coerce=lambda x: int(x) if x else 0, # Handle empty selection
+        coerce=str,  # Accept both IDs (as string) and new exercise names from TomSelect
         choices=[],
+        validate_choice=False,  # Allow new values from TomSelect
         validators=[
             DataRequired(message="Exercise is required."),
-            NumberRange(min=1, message="Select an exercise.")
         ]
     )
     sets = IntegerField(
