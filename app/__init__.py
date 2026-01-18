@@ -1,9 +1,10 @@
+import os
 from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
-from .config import DevelopmentConfig
+from .config import DevelopmentConfig, ProductionConfig
 from .utils import init_template_filters
 
 login_manager = LoginManager()
@@ -13,8 +14,15 @@ db = SQLAlchemy()
 csrf = CSRFProtect()
 
 
-def create_app(config_class=DevelopmentConfig):
+def create_app(config_class=None):
     app = Flask(__name__)
+
+    if config_class is None:
+        env = os.environ.get("FLASK_ENV", "development")
+        if env == "production":
+            config_class = ProductionConfig
+        else:
+            config_class = DevelopmentConfig
 
     app.config.from_object(config_class)
     if not app.config["SQLALCHEMY_DATABASE_URI"]:
