@@ -102,7 +102,7 @@ def client(client_public_id):
             Session.client.has(trainer_id=current_user.id),
             Session.client.has(id=client.id)
         )
-        .order_by(Session.start_dt)
+        .order_by(Session.start_dt.desc())
     )
     sessions = db.session.execute(stmt).scalars().all()
 
@@ -115,7 +115,7 @@ def client(client_public_id):
         except Exception:
             db.session.rollback()
             flash("Error updating client. Please try again.", "danger")
-            return render_template("clients/client.html")
+            return render_template("clients/client.html", client=client, form=form, sessions=sessions)
 
         return redirect(url_for(".client", client_public_id=client.public_id))
 
