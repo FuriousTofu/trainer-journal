@@ -3,6 +3,7 @@ from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .config import DevelopmentConfig, ProductionConfig
 from .utils import init_template_filters
@@ -16,6 +17,7 @@ csrf = CSRFProtect()
 
 def create_app(config_class=None):
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     if config_class is None:
         env = os.environ.get("FLASK_ENV", "development")
