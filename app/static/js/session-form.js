@@ -10,9 +10,14 @@
                 closeAfterSelect: true,
                 maxItems: 1,
                 highlight: true,
+                allowEmptyOption: false,
+                create: true,
                 onChange: () => {
                     htmx.trigger(el, "change");
-                }
+                },
+                createFilter: function(input) {
+                    return input.length >= 3;
+                },
             });
         });
     }
