@@ -129,3 +129,7 @@
         Save Changes
     </button>
 </div>
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/session-form.js') }}"></script>
+{% endblock %}
