@@ -5,7 +5,7 @@
         <div>
             {{ subform.exercise(**{
                 "class": "js-exercise-select",
-                "hx-get": url_for(".exercise_history"),
+                "hx-get": url_for("._exercise_history"),
                 "hx-trigger": "change",
                 "hx-target": "#ex-history-" ~ index,
                 "hx-include": "#" ~ form_id,
