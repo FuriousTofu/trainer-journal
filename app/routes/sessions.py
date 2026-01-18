@@ -176,8 +176,10 @@ def delete_session(session_public_id):
 @bp.route("/sessions/add", methods=["GET", "POST"])
 @login_required
 def add_session():
-    # preselect client if route callet from client card
+    # preselect client if route called from client card
     client_public_id = request.args.get("client_public_id", type=str)
+    # copy from existing session
+    copy_from = request.args.get("copy_from", type=str)
 
     form = AddSessionForm()
 
@@ -202,16 +204,50 @@ def add_session():
     ]
     has_clients = len(form.client.choices) > 1
 
-    if request.method == "GET" and client_public_id:
+    exercise_choices = _exercise_choices(current_user.id)
+    has_exercises = len(exercise_choices) > 1
+
+    # Handle copy from existing session
+    if request.method == "GET" and copy_from:
+        original = db.session.execute(
+            select(Session)
+            .where(
+                Session.public_id == copy_from,
+                Session.client.has(trainer_id=current_user.id)
+            )
+            .options(
+                selectinload(Session.session_exercises)
+            )
+        ).scalars().first()
+
+        if original:
+            # Check if client is still active (not archived)
+            client = db.session.get(Client, original.client_id)
+            if client and not client.archived_at:
+                form.client.data = original.client_id
+                form.duration_min.data = original.duration_min
+                form.mode.data = original.mode
+                form.price.data = original.price
+
+                # Copy exercises
+                for se in original.session_exercises:
+                    entry = form.exercises.append_entry({
+                        "exercise": str(se.exercise_id),
+                        "sets": se.sets,
+                        "reps": se.reps,
+                        "weight": se.weight,
+                    })
+                    entry.exercise.choices = exercise_choices
+
+    # Preselect client if route called from client card
+    elif request.method == "GET" and client_public_id:
         preselected = next((c for c in clients if c.public_id == client_public_id), None)
         if not preselected:
             abort(404)
         form.client.data = preselected.id
         form.price.data = db.session.get(Client, preselected.id).price
 
-    exercise_choices = _exercise_choices(current_user.id)
-    has_exercises = len(exercise_choices) > 1
-
+    # Add empty exercise row if no exercises yet
     if request.method == "GET" and not form.exercises:
         form.exercises.append_entry()
 
@@ -285,13 +321,14 @@ def add_session():
         "sessions/add_session.html",
         form=form,
         has_clients=has_clients,
-        has_exercises=has_exercises
+        has_exercises=has_exercises,
+        is_copy=bool(copy_from)
     )
 
 
-@bp.route("/sessions/exercise_history", methods=["GET"])
+@bp.route("/sessions/_exercise_history", methods=["GET"])
 @login_required
-def exercise_history():
+def _exercise_history():
     """Last sets/reps/weight for given client and exercise (HTMX request)."""
     if not request.headers.get("HX-Request"):
         abort(404)
