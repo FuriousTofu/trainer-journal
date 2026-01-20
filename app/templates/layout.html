@@ -27,6 +27,12 @@
     </head>
 
     <body>
+        {# Navigation items definition - single source of truth #}
+        {% set nav_items = [
+            {'url': url_for('.sessions'), 'path': '/sessions', 'icon': 'bi-journal-bookmark-fill', 'title': 'Sessions'},
+            {'url': url_for('.clients'), 'path': '/clients', 'icon': 'bi-people-fill', 'title': 'Clients'},
+            {'url': url_for('.exercises'), 'path': '/exercises', 'icon': 'bi-heart-pulse-fill', 'title': 'Exercises'}
+        ] %}
         {% if get_flashed_messages() %}
             <header>
                 <div 
@@ -50,37 +56,18 @@
                     <span class="visually-hidden">TrainerJournal</span>
                 </a>
                 <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
+                    {% for item in nav_items %}
                     <li class="nav-item">
                         <a
-                            href="{{ url_for('.sessions') }}"
-                            class="nav-link {% if '/sessions' in request.path %}active{% endif %} py-3 border-bottom border-top rounded-0"
-                            aria-current="page"
-                            title="Sessions"
+                            href="{{ item.url }}"
+                            class="nav-link {% if item.path in request.path %}active{% endif %} py-3 border-bottom {% if loop.first %}border-top{% endif %} rounded-0"
+                            title="{{ item.title }}"
                             data-bs-toggle="tooltip"
                             data-bs-placement="right">
-                            <i class="bi bi-journal-bookmark-fill" style="font-size:2rem;" aria-hidden="true"></i>
+                            <i class="bi {{ item.icon }}" style="font-size:2rem;" aria-hidden="true"></i>
                         </a>
                     </li>
-                    <li>
-                        <a
-                            href="{{ url_for('.clients') }}"
-                            class="nav-link {% if '/clients' in request.path %}active{% endif %} py-3 border-bottom rounded-0"
-                            title="Clients"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="right">
-                            <i class="bi bi-people-fill" style="font-size:2rem;" aria-hidden="true"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="{{ url_for('.exercises') }}"
-                            class="nav-link {% if '/exercises' in request.path %}active{% endif %} py-3 border-bottom rounded-0"
-                            title="Exercises"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="right">
-                            <i class="bi bi-heart-pulse-fill" style="font-size:2rem;" aria-hidden="true"></i>
-                        </a>
-                    </li>
+                    {% endfor %}
                 </ul>
                 <div class="dropdown border-top">
                     <a
@@ -113,18 +100,12 @@
         <!-- Mobile bottom navigation -->
         <nav class="d-md-none fixed-bottom bg-body-tertiary border-top mobile-bottom-nav">
             <div class="d-flex justify-content-around align-items-center py-2">
-                <a href="{{ url_for('.sessions') }}"
-                   class="nav-link text-center px-3 {% if '/sessions' in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
-                    <i class="bi bi-journal-bookmark-fill" style="font-size:1.5rem;"></i>
+                {% for item in nav_items %}
+                <a href="{{ item.url }}"
+                   class="nav-link text-center px-3 {% if item.path in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
+                    <i class="bi {{ item.icon }}" style="font-size:1.5rem;"></i>
                 </a>
-                <a href="{{ url_for('.clients') }}"
-                   class="nav-link text-center px-3 {% if '/clients' in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
-                    <i class="bi bi-people-fill" style="font-size:1.5rem;"></i>
-                </a>
-                <a href="{{ url_for('.exercises') }}"
-                   class="nav-link text-center px-3 {% if '/exercises' in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
-                    <i class="bi bi-heart-pulse-fill" style="font-size:1.5rem;"></i>
-                </a>
+                {% endfor %}
                 <div class="dropdown dropup">
                     <a href="#"
                        class="nav-link text-center px-3 text-body-secondary"
