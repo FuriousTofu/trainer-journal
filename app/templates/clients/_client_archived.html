@@ -7,7 +7,7 @@
         </div>
         <div class="d-flex justify-content-center align-items-center gap-2">
             <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary">
-                <i class="bi bi-arrow-return-left"></i> Clients
+                <i class="bi bi-arrow-return-left"></i>
             </a>
             <form method="post"
                   action="{{ url_for('.unarchive_client', client_public_id=client.public_id) }}"

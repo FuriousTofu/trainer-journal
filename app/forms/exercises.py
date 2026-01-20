@@ -26,8 +26,8 @@ class ExerciseForm(FlaskForm):
 
 
 class AddExerciseForm(ExerciseForm):
-    submit = SubmitField("Add Exercise")
+    submit = SubmitField("Add")
 
 
 class EditExerciseForm(ExerciseForm):
-    submit = SubmitField("Save Changes")
+    submit = SubmitField("Save")

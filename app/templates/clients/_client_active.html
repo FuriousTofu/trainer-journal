@@ -1,12 +1,11 @@
-<div class="d-flex justify-content-between align-items-start" style="max-width: 680px; margin: 0 auto;">
-    <h2 class="h2">{{ client.name }}</h2>
+<div class="d-flex justify-content-end align-items-start" style="max-width: 680px; margin: 0 auto;">
     <div class="d-flex justify-content-center align-items-center gap-2" >
         <a href="{{ url_for('.clients') }}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-return-left"></i> Clients
+            <i class="bi bi-arrow-return-left"></i> 
         </a>
 
         <button type="submit" form="client-edit-form" class="btn btn-primary">
-            Save changes
+            Save
         </button>
 
         <div class="dropdown">
@@ -67,8 +66,8 @@
     {{ form.hidden_tag() }}
 
     <div class="row g-2 mb-2">
-        <div class="col-md-6">
-            <div class="form-floating mb-2">
+        <div class="col-6">
+            <div class="form-floating">
                 {{ form.name(class="form-control", placeholder="Client Name") }}
                 {{ form.name.label(class="form-label") }}
                 {% for error in form.name.errors %}
@@ -77,8 +76,8 @@
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="form-floating mb-2">
+        <div class="col-6">
+            <div class="form-floating">
                 {{ form.status(class="form-select", placeholder="Client Status") }}
                 {{ form.status.label(class="form-label") }}
                 {% for error in form.status.errors %}
@@ -89,8 +88,8 @@
     </div>
 
     <div class="row g-2 mb-2">
-        <div class="col-md-6">
-            <div class="form-floating mb-2">
+        <div class="col-6">
+            <div class="form-floating">
                 {{ form.price(class="form-control", placeholder="Session Price") }}
                 {{ form.price.label(class="form-label") }}
                 {% for error in form.price.errors %}
@@ -99,8 +98,8 @@
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="form-floating mb-2">
+        <div class="col-6">
+            <div class="form-floating">
                 {{ form.contact(class="form-control", placeholder="Contact Information (Optional)") }}
                 {{ form.contact.label(class="form-label") }}
                 {% for error in form.contact.errors %}
@@ -120,14 +119,14 @@
 </form>
 
 <div class="d-flex justify-content-center gap-3 mb-3">
-    <h3 class="h3">{{ client.name }}'s Sessions</h3>
+    <h3 class="h3">Sessions</h3>
 
     {% if client.status == "active" %}
         <button
             type="button"
             class="btn btn-outline-primary mb-3 js-go"
             data-url="{{ url_for('.add_session', client_public_id=client.public_id) }}">
-            <i class="bi bi-plus-circle"></i> Add Session
+            <i class="bi bi-plus-circle"></i> Add
         </button>
     {% else %}
         <span
@@ -139,7 +138,7 @@
                 type="button"
                 class="btn btn-outline-primary"
                 disabled>
-                <i class="bi bi-plus-circle"></i> Add Session
+                <i class="bi bi-plus-circle"></i> Add
             </button>
         </span>
     {% endif %}

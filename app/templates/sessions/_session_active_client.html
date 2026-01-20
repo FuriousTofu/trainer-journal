@@ -2,7 +2,6 @@
 {% set mode = "edit" %}
 
 <h2 class="h2">
-    Session with
     <a href="{{ url_for('.client', client_public_id=session.client.public_id) }}"
        class="link-primary text-decoration-none">
         {{ session.client.name }}
@@ -14,7 +13,7 @@
     {{ form.hidden_tag() }}
 
     <div class="row g-2 mb-2">
-        <div class="col-md-4">
+        <div class="col-4">
             <div class="form-floating mb-2">
                 {{ form.start_dt(class="form-control", type="datetime-local", placeholder="Start Date and Time") }}
                 {{ form.start_dt.label(class="form-label") }}
@@ -24,7 +23,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-4">
             <div class="form-floating mb-2">
                 {{ form.status(class="form-select", placeholder="Status") }}
                 {{ form.status.label(class="form-label") }}
@@ -34,7 +33,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-4">
             <div class="tj-form-field tj-form-field--switch mb-2">
                 <label for="is_paid">Payment</label>
                 <div class="form-check form-switch m-0">
@@ -48,7 +47,7 @@
     </div>
 
     <div class="row g-2 mb-2">
-        <div class="col-md-4">
+        <div class="col-4">
             <div class="form-floating mb-2">
                 {{ form.duration_min(class="form-control", placeholder="Duration (minutes)") }}
                 {{ form.duration_min.label(class="form-label") }}
@@ -58,7 +57,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-4">
             <div class="form-floating mb-2">
                 {{ form.mode(class="form-select", placeholder="Session Mode") }}
                 {{ form.mode.label(class="form-label") }}
@@ -68,7 +67,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-4">
             <div id="price-wrapper">
                 <div class="form-floating mb-2">
                     {{ form.price(class="form-control", placeholder="Session Price") }}
@@ -91,12 +90,12 @@
         <div class="col">
             <button
                 type="button"
-                class="btn btn-outline-primary border-0 shadow-none js-add-exercise"
+                class="btn btn-link text-primary p-0 js-add-exercise"
                 hx-get="{{ url_for('.edit_exercise_row', session_public_id=session.public_id) }}"
                 hx-target="#exercise-wrapper"
                 hx-include="#edit-session-form"
                 hx-swap="beforeend">
-                + Add Exercise
+                <i class="bi bi-plus-circle fs-4"></i>
             </button>
         </div>
     </div>
@@ -112,11 +111,11 @@
 
 <div class="d-flex justify-content-center gap-2">
     <a href="{{ url_for('.sessions') }}" class="btn btn-outline-primary">
-        <i class="bi bi-arrow-return-left"></i> Sessions
+        <i class="bi bi-arrow-return-left"></i> 
     </a>
 
     <button type="submit" form="edit-session-form" class="btn btn-primary px-3">
-        Save Changes
+        Save
     </button>
 
     <div class="dropdown">
@@ -134,7 +133,7 @@
             <li>
                 <a href="{{ url_for('.add_session', copy_from=session.public_id) }}"
                    class="dropdown-item">
-                    <i class="bi bi-copy"></i> Copy Session
+                    <i class="bi bi-copy"></i> Copy
                 </a>
             </li>
 

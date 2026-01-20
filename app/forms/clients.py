@@ -35,7 +35,7 @@ class AddClientForm(FlaskForm):
         validators=[DataRequired(message="Status is required.")]
     )
     contact = StringField(
-        "Contact Information (Optional)",
+        "Contact (Optional)",
         validators=[
             Length(
                 max=100,
@@ -52,4 +52,4 @@ class AddClientForm(FlaskForm):
             )
         ]
     )
-    submit = SubmitField("Add Client")
+    submit = SubmitField("Add")

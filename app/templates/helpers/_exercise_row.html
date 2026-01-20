@@ -1,7 +1,7 @@
 {% set index = subform.name | replace('exercises-', '') %}
 {% set remove_url = url_for('.remove_exercise_row') %}
 <div class="row g-2 mb-2" data-index="{{ index }}">
-    <div class ="col-md-4">
+    <div class="col-4">
         <div>
             {{ subform.exercise(**{
                 "class": "js-exercise-select",
@@ -17,10 +17,10 @@
             {% endfor %}
         </div>
     </div>
-    <div class ="col-md-2">
+    <div class="col-2">
         <div class="form-floating">
             {{ subform.sets(
-                class="form-control", 
+                class="form-control",
                 placeholder="Sets"
             ) }}
             {{ subform.sets.label(class="form-label") }}
@@ -29,10 +29,10 @@
             {% endfor %}
         </div>
     </div>
-    <div class ="col-md-2">
+    <div class="col-2">
         <div class="form-floating">
             {{ subform.reps(
-                class="form-control", 
+                class="form-control",
                 placeholder="Reps"
             ) }}
             {{ subform.reps.label(class="form-label") }}
@@ -41,10 +41,10 @@
             {% endfor %}
         </div>
     </div>
-    <div class ="col-md-3">
+    <div class="col-3">
         <div class="form-floating">
             {{ subform.weight(
-                class="form-control", 
+                class="form-control",
                 placeholder="Weight"
             ) }}
             {{ subform.weight.label(class="form-label") }}
@@ -53,10 +53,10 @@
             {% endfor %}
         </div>
     </div>
-    <div class="col-md-1 d-flex">
+    <div class="col-1 d-flex align-items-center justify-content-center">
         <button
         type="button"
-        class="btn btn-outline-primary w-100 d-md-inline d-block mb-md-0 js-remove-exercise"
+        class="btn btn-link text-primary p-0 js-remove-exercise"
         hx-post="{{ remove_url }}"
         hx-target="#exercise-wrapper"
         hx-include="#{{ form_id }}"
@@ -65,7 +65,7 @@
             "mode": "{{ mode }}"
         }'
         hx-swap="innerHTML">
-        <i class="bi bi-x"></i>
+        <i class="bi bi-x-lg"></i>
         </button>
     </div>
 </div>

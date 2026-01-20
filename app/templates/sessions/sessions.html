@@ -5,9 +5,9 @@
 
 {% block main %}
     <div class="d-flex justify-content-center gap-3 mb-3">
-        <h2>Your sessions list</h2>
+        <h2>Your sessions</h2>
         <a href="{{ url_for('.add_session') }}" class="btn btn-outline-primary mb-3">
-            <i class="bi bi-plus-circle"></i> Add Session
+            <i class="bi bi-plus-circle"></i> Add
         </a>
     </div>
     {% if sessions|length == 0 %}

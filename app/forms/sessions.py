@@ -27,7 +27,7 @@ class AddSessionExerciseForm(Form):
         ]
     )
     reps = IntegerField(
-        "Repetitions",
+        "Reps",
         validators=[
             DataRequired(message="Number of repetitions is required."),
             NumberRange(min=1, message="There must be at least 1 repetition.")
@@ -43,12 +43,12 @@ class AddSessionExerciseForm(Form):
 
 class SessionHeaderBaseForm(FlaskForm):
     start_dt = DateTimeField(
-        "Start Date and Time",
+        "Starts at:",
         format="%Y-%m-%dT%H:%M",
         validators=[DataRequired(message="Start date and time is required.")]
     )
     duration_min = IntegerField(
-        "Duration (minutes)",
+        "Duration (min.)",
         default=60,
         validators=[
             DataRequired(message="Duration is required."),
@@ -60,7 +60,7 @@ class SessionHeaderBaseForm(FlaskForm):
         ]
     )
     mode = SelectField(
-        "Session Mode",
+        "Mode",
         choices=[
             ('online', 'Online'),
             ('offline', 'In-person')
@@ -69,7 +69,7 @@ class SessionHeaderBaseForm(FlaskForm):
         validators=[DataRequired(message="Session mode is required.")]
     )
     price = IntegerField(
-        "Session Price",
+        "Price",
         validators=[
             DataRequired(message="Session price is required."),
             NumberRange(min=0, message="Price must be non-negative.")
@@ -102,7 +102,7 @@ class AddSessionForm(SessionHeaderBaseForm):
         min_entries=0,
         max_entries=30
     )
-    submit = SubmitField("Add Session")
+    submit = SubmitField("Add")
 
 class EditSessionForm(SessionHeaderBaseForm):
     status = SelectField(
@@ -118,7 +118,7 @@ class EditSessionForm(SessionHeaderBaseForm):
         ]
     )
     is_paid = BooleanField("Paid?")
-    submit = SubmitField("Save Changes")
+    submit = SubmitField("Save")
 
 class SessionExercisesHelperForm(Form):
     exercises = FieldList(
