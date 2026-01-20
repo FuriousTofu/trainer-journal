@@ -97,3 +97,14 @@ body {
   border-color: #86b7fe;
   box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
 }
+
+/* Mobile bottom navigation */
+@media (max-width: 767.98px) {
+  .pb-mobile {
+    padding-bottom: 5rem !important;
+  }
+
+  .mobile-bottom-nav {
+    z-index: 1030;
+  }
+}

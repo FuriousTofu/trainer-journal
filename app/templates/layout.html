@@ -41,8 +41,9 @@
             </header>
         {% endif %}
         <div class="d-flex min-vh-100">
-            <aside class="d-flex flex-column flex-shrink-0 bg-body-tertiary"
-                   style="width: 4.5rem; position: sticky; top: 0;">
+            <!-- Desktop sidebar -->
+            <aside class="d-none d-md-flex flex-column flex-shrink-0 bg-body-tertiary sidebar-desktop"
+                   style="width: 4.5rem; position: sticky; top: 0; height: 100vh;">
                 <a  href="/"
                     class="d-block p-3 link-body-emphasis text-decoration-none">
                     <i class="bi bi-leaf-fill {% if request.path == '/' %}text-success{% endif %}" style="font-size:2rem;" aria-hidden="true"></i>
@@ -103,11 +104,42 @@
                 </div>
             </aside>
                 <div class="flex-grow-1">
-                    <main class="container py-5 text-center">
+                    <main class="container py-5 pb-mobile text-center">
                         {% block main %}{% endblock %}
                     </main>
                 </div>
         </div>
+
+        <!-- Mobile bottom navigation -->
+        <nav class="d-md-none fixed-bottom bg-body-tertiary border-top mobile-bottom-nav">
+            <div class="d-flex justify-content-around align-items-center py-2">
+                <a href="{{ url_for('.sessions') }}"
+                   class="nav-link text-center px-3 {% if '/sessions' in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
+                    <i class="bi bi-journal-bookmark-fill" style="font-size:1.5rem;"></i>
+                </a>
+                <a href="{{ url_for('.clients') }}"
+                   class="nav-link text-center px-3 {% if '/clients' in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
+                    <i class="bi bi-people-fill" style="font-size:1.5rem;"></i>
+                </a>
+                <a href="{{ url_for('.exercises') }}"
+                   class="nav-link text-center px-3 {% if '/exercises' in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
+                    <i class="bi bi-heart-pulse-fill" style="font-size:1.5rem;"></i>
+                </a>
+                <div class="dropdown dropup">
+                    <a href="#"
+                       class="nav-link text-center px-3 text-body-secondary"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="Profile" width="28" height="28" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end text-small shadow mb-2">
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('.logout') }}">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
         <script 
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
