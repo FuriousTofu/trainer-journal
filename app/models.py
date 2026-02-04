@@ -3,6 +3,7 @@ from sqlalchemy import (
     Enum, ForeignKey, Boolean, CheckConstraint,
     UniqueConstraint, Index, Numeric, text,
 )
+from enum import Enum as PyEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 from app import db, login_manager
@@ -16,6 +17,13 @@ from app.utils import (
     generate_client_public_id,
     generate_session_public_id
 )
+
+
+class ExerciseType(str, PyEnum):
+    """ Helper enum for exercise types. """
+
+    REPS = "reps"
+    TIME = "time" # cardio, planks, etc.
 
 
 class Trainer(db.Model, UserMixin):
@@ -146,8 +154,6 @@ class Session(db.Model):
     )
     price = Column(Integer, nullable=False)
 
-    # is_paid default False - on db level for any db type
-    # Docs: https://docs.sqlalchemy.org/en/20/core/sqlelement.html
     is_paid = Column(
         Boolean,
         nullable=False,
@@ -170,7 +176,6 @@ class Session(db.Model):
         passive_deletes=True
     )
 
-
 class Exercise(db.Model):
     """Represents an exercise - reusable, can be linked to multiple sessions."""
 
@@ -189,6 +194,12 @@ class Exercise(db.Model):
         default=True,
         server_default=expression.true()
     )
+    type = Column(
+        String(20),
+        nullable=False,
+        default=ExerciseType.REPS.value,
+        server_default=ExerciseType.REPS.value
+    )
     description = Column(Text)
 
     session_exercises = relationship("SessionExercise", back_populates="exercise")
@@ -197,6 +208,10 @@ class Exercise(db.Model):
     # UniqueConstraint - exercise names must be unique per trainer
     __table_args__ = (
         UniqueConstraint('trainer_id', 'name', name='uq_exercise_name_per_trainer'),
+        CheckConstraint(
+            f"type IN ('{ExerciseType.REPS.value}', '{ExerciseType.TIME.value}')",
+            name="ck_exercise_type_valid"
+        )
     )
 
 
@@ -225,14 +240,21 @@ class SessionExercise(db.Model):
     )
 
     sets = Column(Integer, nullable=False)
-    reps = Column(Integer, nullable=False)
-    # Weight in kg, can be decimal
+    reps = Column(Integer, nullable=True)
+    time_seconds = Column(Integer, nullable=True)  # for time-based exercises
     weight = Column(Numeric(5, 2), nullable=False, default=0, server_default=text("0"))
 
     __table_args__ = (
         CheckConstraint("sets > 0", name="ck_session_exercise_sets_positive"),
-        CheckConstraint("reps > 0", name="ck_session_exercise_reps_positive"),
+        CheckConstraint("reps IS NULL OR reps > 0", name="ck_session_exercise_reps_positive"),
         CheckConstraint("weight >= 0", name="ck_session_exercise_weight_nonnegative"),
+        CheckConstraint("time_seconds IS NULL OR time_seconds > 0", name="ck_session_exercise_time_positive"),
+
+        # Only one of two fields can be null, based on exercise type
+        CheckConstraint(
+            "num_nonnulls(reps, time_seconds) = 1",
+            name="ck_session_exercise_one_metric_required"
+        ),
         Index("ix_se_client_exercise", "client_id", "exercise_id")
     )
 
