@@ -4,6 +4,8 @@ from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from .config import DevelopmentConfig, ProductionConfig
 from .utils import init_template_filters
@@ -13,6 +15,13 @@ login_manager.login_view = "main.login"
 
 db = SQLAlchemy()
 csrf = CSRFProtect()
+
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["30 per minute"],
+    storage_uri="memory://",
+)
 
 
 def create_app(config_class=None):
@@ -35,6 +44,7 @@ def create_app(config_class=None):
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    limiter.init_app(app)
 
     init_template_filters(app)
 
