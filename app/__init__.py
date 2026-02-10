@@ -19,7 +19,7 @@ csrf = CSRFProtect()
 
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["30 per minute"],
+    default_limits=["20 per minute"],
     storage_uri="memory://",
 )
 
