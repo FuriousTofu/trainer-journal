@@ -29,8 +29,15 @@ class AddSessionExerciseForm(Form):
     reps = IntegerField(
         "Reps",
         validators=[
-            DataRequired(message="Number of repetitions is required."),
+            Optional(),
             NumberRange(min=1, message="There must be at least 1 repetition.")
+        ]
+    )
+    time_seconds = IntegerField(
+        "Time",
+        validators=[
+            Optional(),
+            NumberRange(min=1, message="There must be at least 1 second.")
         ]
     )
     weight = DecimalField(

@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField
+from wtforms import SelectField, StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Length
+from app.models import ExerciseType
 
 
 class ExerciseForm(FlaskForm):
@@ -13,6 +14,12 @@ class ExerciseForm(FlaskForm):
                 message="Exercise name must be at most 90 characters long."
             )
         ]
+    )
+    type = SelectField(
+        "Type",
+        choices=[(t.value, t.value.capitalize()) for t in ExerciseType],
+        default=ExerciseType.REPS.name,
+        validators=[DataRequired(message="Exercise type is required.")]
     )
     description = TextAreaField(
         "Description (Optional)",

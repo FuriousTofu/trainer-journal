@@ -64,6 +64,7 @@ def add_exercise():
         else:
             new_exercise = Exercise(
                 name=name,
+                type=form.type.data,
                 description=description,
                 trainer_id=current_user.id
             )
@@ -103,6 +104,7 @@ def exercise(exercise_id):
             if form.description.data
             else None
         )
+        type = form.type.data
 
         dup_stmt = select(
             exists().where(
@@ -120,7 +122,16 @@ def exercise(exercise_id):
 
         else:
             exercise.name = name
+            exercise.type = type
             exercise.description = description
+
+            # Prevent type change if used
+            if exercise_used and exercise.type != type:
+                flash("Exercise type cannot be changed after first use.", "danger")
+                return render_template(
+                    "exercises/exercise.html", exercise=exercise,
+                    form=form, exercise_used=exercise_used
+                )
             try:
                 db.session.commit()
                 flash("Exercise updated successfully", "success")
