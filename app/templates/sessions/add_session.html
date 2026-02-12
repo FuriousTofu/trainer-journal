@@ -122,6 +122,7 @@
             </div>
         </form>
             {% block scripts %}
+                <script>window.EXERCISE_TYPES = {{ exercise_types | tojson }};</script>
                 <script src="{{ url_for('static', filename='js/ex-history.js') }}"></script>
                 <script src="{{ url_for('static', filename='js/session-form.js') }}"></script>
                 {% if is_copy %}

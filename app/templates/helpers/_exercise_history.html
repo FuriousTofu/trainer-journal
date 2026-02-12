@@ -1,9 +1,13 @@
 {% if rows %}
     <div class="small text-muted">
-        {% for start_dt, sets, reps, weight in rows %}
+        {% for start_dt, sets, reps, time_seconds, weight in rows %}
             <div class="d-flex justify-content-between border-bottom py-1">
                 <span>{{ start_dt | dt_no_seconds("%d.%m.%Y") }}</span>
-                <span>{{ sets }} x {{ reps }} </span>
+                {% if exercise_type == 'time' %}
+                    <span>{{ sets }} x {{ time_seconds }}s</span>
+                {% else %}
+                    <span>{{ sets }} x {{ reps }}</span>
+                {% endif %}
                 <span>{{ weight }} kg</span>
             </div>
         {% endfor %}

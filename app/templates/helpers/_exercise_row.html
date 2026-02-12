@@ -1,6 +1,7 @@
 {% set index = subform.name | replace('exercises-', '') %}
 {% set remove_url = url_for('.remove_exercise_row') %}
-<div class="row g-2 mb-2" data-index="{{ index }}">
+{% set ex_type = exercise_types.get(subform.exercise.data | string, 'reps') if exercise_types is defined else 'reps' %}
+<div class="row g-2 mb-2 exercise-row" data-index="{{ index }}">
     <div class="col-4">
         <div>
             {{ subform.exercise(**{
@@ -29,7 +30,7 @@
             {% endfor %}
         </div>
     </div>
-    <div class="col-2">
+    <div class="col-2 exercise-field-reps" {% if ex_type == 'time' %}style="display:none"{% endif %}>
         <div class="form-floating">
             {{ subform.reps(
                 class="form-control",
@@ -37,6 +38,18 @@
             ) }}
             {{ subform.reps.label(class="form-label") }}
             {% for error in subform.reps.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-2 exercise-field-time" {% if ex_type != 'time' %}style="display:none"{% endif %}>
+        <div class="form-floating">
+            {{ subform.time_seconds(
+                class="form-control",
+                placeholder="Time (sec)"
+            ) }}
+            {{ subform.time_seconds.label(class="form-label") }}
+            {% for error in subform.time_seconds.errors %}
                 <div class="text-danger small">{{ error }}</div>
             {% endfor %}
         </div>
