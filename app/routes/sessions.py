@@ -59,7 +59,7 @@ def session(session_public_id):
     if request.method == "POST" and session_obj.client.archived_at:
         abort(403)
 
-    exercise_choices = _exercise_choices(current_user.id)
+    exercise_choices, exercise_types = _exercise_choices(current_user.id)
 
     if request.method == "POST":
         header_form = EditSessionForm(formdata=request.form, obj=session_obj)
@@ -76,6 +76,7 @@ def session(session_public_id):
                 "exercise": se.exercise_id,
                 "sets": se.sets,
                 "reps": se.reps,
+                "time_seconds": se.time_seconds,
                 "weight": se.weight,
             })
             entry.form.exercise.choices = exercise_choices
@@ -114,7 +115,8 @@ def session(session_public_id):
                         client_id=session_obj.client_id,
                         exercise_id=ex.id,
                         sets=sub.sets.data,
-                        reps=sub.reps.data,
+                        reps=sub.reps.data or None,
+                        time_seconds=sub.time_seconds.data or None,
                         weight=weight,
                     )
                     db.session.add(se)
@@ -131,16 +133,18 @@ def session(session_public_id):
                     "sessions/session.html",
                     session=session_obj,
                     form=header_form,
-                    exercises_form=exercises_form
+                    exercises_form=exercises_form,
+                    exercise_types=exercise_types,
                 )
         else:
             flash("Please correct the errors below.", "danger")
-    
+
     return render_template(
         "sessions/session.html",
         session=session_obj,
         form=header_form,
-        exercises_form=exercises_form
+        exercises_form=exercises_form,
+        exercise_types=exercise_types,
     )
 
 
@@ -204,7 +208,7 @@ def add_session():
     ]
     has_clients = len(form.client.choices) > 1
 
-    exercise_choices = _exercise_choices(current_user.id)
+    exercise_choices, exercise_types = _exercise_choices(current_user.id)
     has_exercises = len(exercise_choices) > 1
 
     # Handle copy from existing session
@@ -235,6 +239,7 @@ def add_session():
                         "exercise": str(se.exercise_id),
                         "sets": se.sets,
                         "reps": se.reps,
+                        "time_seconds": se.time_seconds,
                         "weight": se.weight,
                     })
                     entry.exercise.choices = exercise_choices
@@ -288,7 +293,8 @@ def add_session():
                     client_id=s.client_id,
                     exercise_id=ex.id,
                     sets=sub.sets.data,
-                    reps=sub.reps.data,
+                    reps=sub.reps.data or None,
+                    time_seconds=sub.time_seconds.data or None,
                     weight=weight,
                 )
                 db.session.add(se)
@@ -322,7 +328,8 @@ def add_session():
         form=form,
         has_clients=has_clients,
         has_exercises=has_exercises,
-        is_copy=bool(copy_from)
+        is_copy=bool(copy_from),
+        exercise_types=exercise_types,
     )
 
 
@@ -368,7 +375,8 @@ def _exercise_history():
             Session.start_dt,
             SessionExercise.sets,
             SessionExercise.reps,
-            SessionExercise.weight
+            SessionExercise.time_seconds,
+            SessionExercise.weight,
         )
         .join(SessionExercise, Session.id == SessionExercise.session_id)
         .where(
@@ -380,7 +388,14 @@ def _exercise_history():
         .limit(3)
     ).all()
 
-    return render_template("helpers/_exercise_history.html", rows=rows)
+    exercise = db.session.get(Exercise, exercise_id)
+    exercise_type = exercise.type if exercise else "reps"
+
+    return render_template(
+        "helpers/_exercise_history.html",
+        rows=rows,
+        exercise_type=exercise_type,
+    )
 
 
 @bp.route("/sessions/add_exercise_row")
@@ -392,14 +407,15 @@ def exercise_row():
     form = AddSessionForm(formdata=request.args)
     subform = form.exercises.append_entry()
 
-    exercise_choices = _exercise_choices(current_user.id)
+    exercise_choices, exercise_types = _exercise_choices(current_user.id)
     subform.exercise.choices = exercise_choices
 
     return render_template(
         "helpers/_exercise_row.html",
         subform=subform,
         mode="add",
-        form_id="add-session-form"
+        form_id="add-session-form",
+        exercise_types=exercise_types,
     )
 
 @bp.route("/sessions/<string:session_public_id>/add_exercise_row")
@@ -417,7 +433,7 @@ def edit_exercise_row(session_public_id):
     if not session_obj:
         abort(404)
     
-    exercises_choices = _exercise_choices(current_user.id)
+    exercises_choices, exercise_types = _exercise_choices(current_user.id)
     exercises_form = SessionExercisesHelperForm(formdata=request.args)
     for entry in exercises_form.exercises:
         entry.form.exercise.choices = exercises_choices
@@ -429,7 +445,8 @@ def edit_exercise_row(session_public_id):
         "helpers/_exercise_row.html",
         subform=new_entry,
         mode="edit",
-        form_id="edit-session-form"
+        form_id="edit-session-form",
+        exercise_types=exercise_types,
     )
 
 
@@ -466,15 +483,17 @@ def remove_exercise_row():
         new_sub.form.exercise.data = sub.form.exercise.data
         new_sub.form.sets.data = sub.form.sets.data
         new_sub.form.reps.data = sub.form.reps.data
+        new_sub.form.time_seconds.data = sub.form.time_seconds.data
         new_sub.form.weight.data = sub.form.weight.data
 
-    exercise_choices = _exercise_choices(current_user.id)
+    exercise_choices, exercise_types = _exercise_choices(current_user.id)
     for sub in new_form.exercises:
         sub.form.exercise.choices = exercise_choices
 
     return render_template(
         "helpers/_exercise_rows.html", form=new_form,
-        mode=mode, form_id=form_id
+        mode=mode, form_id=form_id,
+        exercise_types=exercise_types,
     )
 
 
@@ -540,16 +559,16 @@ def _get_or_create_exercise(exercise_value: str, trainer_id: int) -> Exercise:
 def _exercise_choices(user_id: int):
     """Get exercise choices for select fields."""
     exercises = db.session.execute(
-        select(Exercise.id, Exercise.name)
+        select(Exercise.id, Exercise.name, Exercise.type)
         .where(
             Exercise.trainer_id == user_id,
             Exercise.is_active.is_(True)
         )
         .order_by(Exercise.name)
     ).all()
-    return [("", "")] + [
-        (str(e.id), e.name) for e in exercises
-    ]
+    choices = [("", "")] + [(str(e.id), e.name) for e in exercises]
+    type_map = {str(e.id): e.type for e in exercises}
+    return choices, type_map
 
 
 def _local_to_utc(naive_dt: datetime, tz_name: str = "Europe/Kyiv") -> datetime:
