@@ -58,16 +58,6 @@
         </div>
 
         <div class="col-4">
-            <div class="form-floating mb-2">
-                {{ form.mode(class="form-select", placeholder="Session Mode") }}
-                {{ form.mode.label(class="form-label") }}
-                {% for error in form.mode.errors %}
-                    <div class="text-danger small">{{ error }}</div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="col-4">
             <div id="price-wrapper">
                 <div class="form-floating mb-2">
                     {{ form.price(class="form-control", placeholder="Session Price") }}

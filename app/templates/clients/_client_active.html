@@ -148,7 +148,6 @@
     <thead>
         <tr>
             <th class="text-start">Start</th>
-            <th class="text-start">Mode</th>
             <th class="text-start">Status</th>
             <th class="text-start">Payment</th>
         </tr>
@@ -160,9 +159,6 @@
                 data-url="{{ url_for('.session', session_public_id=session.public_id) }}">
                 <td class="text-start">
                     {{ session.start_dt|dt_no_seconds }}
-                </td>
-                <td class="text-start">
-                    {{ mode_badge(session.mode) }}
                 </td>
                 <td class="text-start">
                     {{ session_status_badge(session.status) }}

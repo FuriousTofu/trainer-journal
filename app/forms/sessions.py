@@ -66,15 +66,6 @@ class SessionHeaderBaseForm(FlaskForm):
             )
         ]
     )
-    mode = SelectField(
-        "Mode",
-        choices=[
-            ('online', 'Online'),
-            ('offline', 'In-person')
-        ],
-        default='offline',
-        validators=[DataRequired(message="Session mode is required.")]
-    )
     price = IntegerField(
         "Price",
         validators=[

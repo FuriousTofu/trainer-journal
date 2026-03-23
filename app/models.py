@@ -138,13 +138,6 @@ class Session(db.Model):
     )
     start_dt = Column(DateTime(timezone=True), nullable=False, index=True)
     duration_min = Column(Integer, nullable=False, default=60, server_default="60")
-    mode = Column(
-        Enum("online", "offline", name="session_format"),
-        nullable=False,
-        default="offline",
-        server_default="offline"
-    )
-
     # no_show - trainer has the right to charge a fee.
     status = Column(
         Enum("planned", "done", "cancelled", "no_show", name="session_status"),

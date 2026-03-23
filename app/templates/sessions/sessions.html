@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros/badges.html" import paid_badge, mode_badge, session_status_badge %}
+{% from "macros/badges.html" import paid_badge, session_status_badge %}
 
 {% block title %}Sessions{% endblock %}
 
@@ -23,7 +23,6 @@
                 <tr>
                     <th class="text-start">Start</th>
                     <th class="text-start">Client</th>
-                    <th class="text-start">Mode</th>
                     <th class="text-start">Status</th>
                     <th class="text-start"><i class="bi bi-piggy-bank fs-5"></i></th>
                 </tr>
@@ -37,9 +36,6 @@
                             {{ session.start_dt|dt_no_seconds }}
                         </td>
                         <td class="text-start">{{ session.client.name }}</td>
-                        <td class="text-start">
-                            {{ mode_badge(session.mode) }}
-                        </td>
                         <td class="text-start">
                             {{ session_status_badge(session.status) }}</td>
                         <td class="text-start">

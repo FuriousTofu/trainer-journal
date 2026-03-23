@@ -230,7 +230,6 @@ def add_session():
             if client and not client.archived_at:
                 form.client.data = original.client_id
                 form.duration_min.data = original.duration_min
-                form.mode.data = original.mode
                 form.price.data = original.price
 
                 # Copy exercises
@@ -271,7 +270,6 @@ def add_session():
                 client_id=form.client.data,
                 start_dt=_local_to_utc(form.start_dt.data),
                 duration_min=form.duration_min.data,
-                mode=form.mode.data,
                 price=form.price.data,
                 notes=form.notes.data.strip()
                 if form.notes.data

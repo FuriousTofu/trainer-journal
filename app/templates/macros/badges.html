@@ -19,15 +19,6 @@
     {% endif %}
 {% endmacro %}
 
-{# Session mode badge #}
-{% macro mode_badge(mode) %}
-    {% if mode == 'online' %}
-        Online
-    {% else %}
-        In-person
-    {% endif %}
-{% endmacro %}
-
 {# Client status badge #}
 {% macro status_badge(status) %}
     {% if status == 'active' %}
