@@ -1,9 +1,9 @@
 {# Session payment badge #}
 {% macro paid_badge(is_paid) %}
     {% if is_paid %}
-        Paid
+        <i class="bi bi-coin text-success fs-6"></i>
     {% else %}
-        Unpaid
+        <i class="bi bi-coin fs-6"></i>
     {% endif %}
 {% endmacro %}
 
