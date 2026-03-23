@@ -31,7 +31,8 @@
         {% set nav_items = [
             {'url': url_for('.sessions'), 'path': '/sessions', 'icon': 'bi-journal-bookmark-fill', 'title': 'Sessions'},
             {'url': url_for('.clients'), 'path': '/clients', 'icon': 'bi-people-fill', 'title': 'Clients'},
-            {'url': url_for('.exercises'), 'path': '/exercises', 'icon': 'bi-heart-pulse-fill', 'title': 'Exercises'}
+            {'url': url_for('.exercises'), 'path': '/exercises', 'icon': 'bi-heart-pulse-fill', 'title': 'Exercises'},
+            {'url': url_for('.tags'), 'path': '/tags', 'icon': 'bi bi-tags-fill', 'title': 'Tags'}
         ] %}
         {% if get_flashed_messages() %}
             <header>
@@ -75,13 +76,7 @@
                         class="d-flex align-items-center justify-content-center p-3 link-body-emphasis text-decoration-none dropdown-toggle"
                         data-bs-toggle="dropdown"
                         aria-expanded="false">
-                        <img
-                        src="https://github.com/mdo.png"
-                        alt="mdo"
-                        width="24"
-                        height="24"
-                        class="rounded-circle"
-                        />
+                        <i class="bi bi-person-circle fs-5"></i>
                     </a>
                     <ul class="dropdown-menu text-small shadow">
                         <li><a class="dropdown-item" href="#">Settings</a></li>
@@ -111,7 +106,7 @@
                        class="nav-link text-center px-3 text-body-secondary"
                        data-bs-toggle="dropdown"
                        aria-expanded="false">
-                        <img src="https://github.com/mdo.png" alt="Profile" width="28" height="28" class="rounded-circle">
+                       <i class="bi bi-person-circle fs-5"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end text-small shadow mb-2">
                         <li><a class="dropdown-item" href="#">Settings</a></li>

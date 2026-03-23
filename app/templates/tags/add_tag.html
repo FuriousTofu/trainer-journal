@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Tag
+{% endblock %}
+
+{% block main %}
+    <h2 class="h2">Add New Tag</h2>
+    <form method="post" action="{{ url_for('.add_tag') }}" novalidate class="add-form">
+        {{ form.hidden_tag() }}
+        <div class="row g-2 mb-2">
+            <div class="col">
+                <div class="form-floating mb-2">
+                    {{ form.name(class="form-control", placeholder="Tag Name") }}
+                    {{ form.name.label(class="form-label") }}
+                    {% for error in form.name.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-auto d-flex align-items-center">
+                <input type="color" name="color" value="{{ form.color.data }}" class="form-control form-control-color" title="Choose tag color">
+            </div>
+        </div>
+        <div class="d-flex justify-content-center gap-2">
+            <a href="{{ url_for('.tags') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-return-left"></i>
+            </a>
+            {{ form.submit(class="btn btn-primary px-3") }}
+        </div>
+    </form>
+
+{% endblock %}

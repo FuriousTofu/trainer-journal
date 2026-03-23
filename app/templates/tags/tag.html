@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ tag.name }}
+{% endblock %}
+
+{% block main %}
+<div style="max-width: 680px; margin: 0 auto;">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h2 class="h2 mb-0">{{ tag.name }}</h2>
+        </div>
+        <div class="d-flex justify-content-center align-items-center gap-2" >
+            <a href="{{ url_for('.tags') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-return-left"></i>
+            </a>
+            <button type="submit" form="tag-edit-form" class="btn btn-primary px-3">
+                Save
+            </button>
+            {% include "tags/_tag_actions_dropdown.html" %}
+        </div>
+    </div>
+    <form
+        id="tag-edit-form"
+        method="post"
+        action="{{ url_for('.tag', tag_id=tag.id) }}"
+        novalidate
+    >
+        {{ form.hidden_tag() }}
+
+        <div class="row g-2 mb-2">
+            <div class="col">
+                <div class="form-floating">
+                    {{ form.name(class="form-control", placeholder="Tag Name") }}
+                    {{ form.name.label(class="form-label") }}
+                    {% for error in form.name.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-auto d-flex align-items-center">
+                <input type="color" name="color" value="{{ form.color.data }}" class="form-control form-control-color" title="Choose tag color">
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

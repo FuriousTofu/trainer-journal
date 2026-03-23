@@ -2,6 +2,7 @@
 
 from .clients import AddClientForm
 from .exercises import AddExerciseForm, EditExerciseForm
+from .tags import AddTagForm, EditTagForm
 from .sessions import (
     AddSessionForm, SessionExercisesHelperForm,
     EditSessionForm,
