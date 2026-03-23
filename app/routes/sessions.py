@@ -13,6 +13,7 @@ from app import db
 from app.models import (
     Client, Session,
     Exercise, SessionExercise,
+    Tag, SessionTag,
 )
 from app.forms import (
     AddSessionForm, SessionExercisesHelperForm,
@@ -32,6 +33,9 @@ def sessions():
             Client.trainer_id == current_user.id,
             Client.archived_at.is_(None)
         )
+        .options(
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
+        )
         .order_by(Session.start_dt.desc())
     )
     sessions = db.session.execute(stmt).scalars().all()
@@ -47,7 +51,8 @@ def session(session_public_id):
         )
         .options(
             selectinload(Session.client),
-            selectinload(Session.session_exercises).selectinload(SessionExercise.exercise)
+            selectinload(Session.session_exercises).selectinload(SessionExercise.exercise),
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
         )
     )
     session_obj = db.session.execute(stmt).scalars().first()
@@ -60,6 +65,10 @@ def session(session_public_id):
         abort(403)
 
     exercise_choices, exercise_types = _exercise_choices(current_user.id)
+
+    all_tags = db.session.execute(
+        select(Tag).where(Tag.trainer_id == current_user.id).order_by(Tag.name)
+    ).scalars().all()
 
     if request.method == "POST":
         header_form = EditSessionForm(formdata=request.form, obj=session_obj)
@@ -120,6 +129,18 @@ def session(session_public_id):
                         weight=weight,
                     )
                     db.session.add(se)
+
+                # Update session tags
+                db.session.query(SessionTag).filter_by(
+                    session_id=session_obj.id
+                ).delete()
+                tag_ids = request.form.getlist("tags", type=int)
+                for tag_id in tag_ids:
+                    db.session.add(SessionTag(
+                        session_id=session_obj.id,
+                        tag_id=tag_id,
+                    ))
+
                 db.session.commit()
                 flash("Session updated successfully", "success")
                 return redirect(
@@ -135,6 +156,7 @@ def session(session_public_id):
                     form=header_form,
                     exercises_form=exercises_form,
                     exercise_types=exercise_types,
+                    all_tags=all_tags,
                 )
         else:
             flash("Please correct the errors below.", "danger")
@@ -145,6 +167,7 @@ def session(session_public_id):
         form=header_form,
         exercises_form=exercises_form,
         exercise_types=exercise_types,
+        all_tags=all_tags,
     )
 
 
@@ -210,6 +233,10 @@ def add_session():
 
     exercise_choices, exercise_types = _exercise_choices(current_user.id)
     has_exercises = len(exercise_choices) > 1
+
+    all_tags = db.session.execute(
+        select(Tag).where(Tag.trainer_id == current_user.id).order_by(Tag.name)
+    ).scalars().all()
 
     # Handle copy from existing session
     if request.method == "GET" and copy_from:
@@ -297,6 +324,14 @@ def add_session():
                 )
                 db.session.add(se)
 
+            # Save session tags
+            tag_ids = request.form.getlist("tags", type=int)
+            for tag_id in tag_ids:
+                db.session.add(SessionTag(
+                    session_id=s.id,
+                    tag_id=tag_id,
+                ))
+
             db.session.commit()
             flash("Session added successfully", "success")
             return redirect(url_for(".sessions"))
@@ -328,6 +363,7 @@ def add_session():
         has_exercises=has_exercises,
         is_copy=bool(copy_from),
         exercise_types=exercise_types,
+        all_tags=all_tags,
     )
 
 

@@ -13,7 +13,7 @@
     {{ form.hidden_tag() }}
 
     <div class="row g-2 mb-2">
-        <div class="col-4">
+        <div class="col-8">
             <div class="form-floating mb-2">
                 {{ form.start_dt(class="form-control", type="datetime-local", placeholder="Start Date and Time") }}
                 {{ form.start_dt.label(class="form-label") }}
@@ -31,18 +31,6 @@
                     <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
             </div>
-        </div>
-
-        <div class="col-4">
-            <div class="tj-form-field tj-form-field--switch mb-2">
-                <label for="is_paid">Payment</label>
-                <div class="form-check form-switch m-0">
-                    {{ form.is_paid(class="form-check-input m-0", id="is_paid", role="switch") }}
-                </div>
-            </div>
-            {% for error in form.is_paid.errors %}
-                <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
         </div>
     </div>
 
@@ -68,7 +56,32 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-4">
+            <div class="tj-form-field tj-form-field--switch mb-2">
+                <label for="is_paid">Payment</label>
+                <div class="form-check form-switch m-0">
+                    {{ form.is_paid(class="form-check-input m-0", id="is_paid", role="switch") }}
+                </div>
+            </div>
+            {% for error in form.is_paid.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
     </div>
+
+    {% if all_tags %}
+    <div class="mb-2">
+        <select id="input-tags" name="tags" multiple placeholder="Select tags...">
+            {% for tag in all_tags %}
+                <option value="{{ tag.id }}"
+                    data-color="{{ tag.color }}"
+                    {% if tag.id in session.session_tags | map(attribute='tag_id') | list %}selected{% endif %}
+                >{{ tag.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
 
     <div id="exercise-wrapper">
         {% for subform in exercises_form.exercises %}

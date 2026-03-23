@@ -24,6 +24,7 @@
                     <th class="text-start">Start</th>
                     <th class="text-start">Client</th>
                     <th class="text-start">Status</th>
+                    <th class="text-start">Tags</th>
                     <th class="text-start"><i class="bi bi-piggy-bank fs-5"></i></th>
                 </tr>
             </thead>
@@ -38,6 +39,11 @@
                         <td class="text-start">{{ session.client.name }}</td>
                         <td class="text-start">
                             {{ session_status_badge(session.status) }}</td>
+                        <td class="text-start">
+                            {% for st in session.session_tags %}
+                                <span class="badge" style="background-color: {{ st.tag.color }}">{{ st.tag.name }}</span>
+                            {% endfor %}
+                        </td>
                         <td class="text-start">
                             {{ paid_badge(session.is_paid) }}
                         </td>
