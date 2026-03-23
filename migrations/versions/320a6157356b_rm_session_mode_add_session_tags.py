@@ -25,6 +25,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('trainer_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=20), nullable=False),
+    sa.Column('color', sa.String(length=7), nullable=False, server_default='#6B7280'),
     sa.ForeignKeyConstraint(['trainer_id'], ['trainers.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('trainer_id', 'name', name='uq_tag_name_per_trainer')

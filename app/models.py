@@ -279,6 +279,12 @@ class Tag(db.Model):
         index=True
     )
     name = Column(String(20), nullable=False)
+    color = Column(
+        String(7),
+        nullable=False,
+        default="#6B7280",
+        server_default="#6B7280"
+    )
 
     session_tags = relationship(
         "SessionTag",
