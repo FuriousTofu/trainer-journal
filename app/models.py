@@ -62,6 +62,12 @@ class Trainer(db.Model, UserMixin):
         passive_deletes=True
     )
 
+    tags = relationship(
+        "Tag",
+        back_populates="trainer",
+        cascade="all",
+        passive_deletes=True
+    )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -168,6 +174,12 @@ class Session(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True
     )
+    session_tags = relationship(
+        "SessionTag",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
 
 class Exercise(db.Model):
     """Represents an exercise - reusable, can be linked to multiple sessions."""
@@ -253,3 +265,50 @@ class SessionExercise(db.Model):
 
     session = relationship("Session", back_populates="session_exercises")
     exercise = relationship("Exercise", back_populates="session_exercises")
+
+
+class Tag(db.Model):
+    """Represents a tag to label sessions - reusable, can be linked to multiple sessions."""
+
+    __tablename__ = "tags"
+    id = Column(Integer, primary_key=True)
+    trainer_id = Column(
+        Integer,
+        ForeignKey("trainers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    name = Column(String(20), nullable=False)
+
+    session_tags = relationship(
+        "SessionTag",
+        back_populates="tag",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+    trainer = relationship("Trainer", back_populates="tags")
+
+    __table_args__ = (
+        UniqueConstraint('trainer_id', 'name', name='uq_tag_name_per_trainer'),
+    )
+
+
+class SessionTag(db.Model):
+    """Links a tag to a specific session (many-to-many)."""
+
+    __tablename__ = "session_tags"
+    session_id = Column(
+        Integer,
+        ForeignKey("sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True
+    )
+    tag_id = Column(
+        Integer,
+        ForeignKey("tags.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True
+    )
+
+    session = relationship("Session", back_populates="session_tags")
+    tag = relationship("Tag", back_populates="session_tags")
