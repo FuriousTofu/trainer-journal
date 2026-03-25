@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime,
     Enum, ForeignKey, Boolean, CheckConstraint,
@@ -180,6 +182,12 @@ class Session(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True
     )
+
+    @property
+    def is_overdue(self):
+        from datetime import timedelta
+        end_dt = self.start_dt + timedelta(minutes=self.duration_min)
+        return self.status == "planned" and end_dt < datetime.now(timezone.utc)
 
 class Exercise(db.Model):
     """Represents an exercise - reusable, can be linked to multiple sessions."""
