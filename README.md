@@ -1,10 +1,19 @@
 # TrainerJournal
 
-#### Video Demo: https://youtu.be/Uc07ZfU6lkk?si=4_O87wxzFZAD7Lgy
-
 #### Description:
 
 TrainerJournal is a comprehensive web application designed for personal fitness trainers to manage their clients, training sessions, exercises, and business operations. Built as my CS50 final project, it has evolved into a production-ready tool currently used by three alpha testers in real training environments.
+
+## 🔔 Updates
+
+#### 25/03/2026 v 0.1.1:
+- **Tag system**: create, edit, and delete custom color-coded tags to label sessions (up to 4 per session)
+- **Home dashboard**: today's sessions and unpaid sessions overview on the main page
+- **Quick actions**: toggle session status (planned/done) and payment status directly from session tables via HTMX
+- **Overdue sessions**: planned sessions past their end time are now visually highlighted
+- **Removed session mode**: online/in-person distinction dropped from the entire project
+- **Payment badges**: redesigned as interactive inline icons
+- **UI cleanup**: refactored client/session tables with reusable macros and helpers
 
 ## 🛠️ Technology Stack
 
@@ -22,7 +31,7 @@ The application is built using:
 Trainers can create and manage client profiles with contact information, session pricing, and custom notes. Clients can be marked as active or on pause — paused clients remain visible in the main list but cannot have new sessions scheduled. Clients can be archived (read-only access in a separate tab) or permanently deleted (and removing all associated sessions).
 
 ### Session Scheduling
-The session management system allows trainers to schedule training sessions with specific start times, duration, mode (online/in-person), and pricing. Each session can include multiple exercises with sets, reps, and weight tracking. The system displays exercise history from previous sessions, helping trainers make informed programming decisions. Sessions can be marked as planned, done, cancelled or no-show, with payment tracking for business operations.
+The session management system allows trainers to schedule training sessions with specific start times, duration, and pricing. Each session can include multiple exercises with sets, reps, and weight tracking. The system displays exercise history from previous sessions, helping trainers make informed programming decisions. Sessions can be marked as planned, done, cancelled or no-show, with payment tracking for business operations. Trainers can create custom color-coded tags and assign up to four tags per session, making it easy to categorize and visually distinguish different types of training.
 
 ### Exercise Library
 Trainers maintain a personal exercise database with names and descriptions. Exercises can be archived when no longer used but are never deleted if referenced in session history. The system supports creating new exercises on-the-fly during session planning through TomSelect's create functionality, streamlining the workflow.
@@ -67,61 +76,10 @@ The application successfully handles three active trainers managing real clients
 - User settings: timezone, currency, units of measurement
 - Password recovery and Google login
 - Dashboard with upcoming sessions and payment summaries
-- Time-based exercise completion tracking
 - Session filters and sorting
 - 1RM calculations for periodization planning
 - Client progress graphs and search functionality
 
-This project taught me practical web development beyond tutorial projects: handling real user feedback, implementing security layers, managing database migrations in production, and making pragmatic technology choices based on actual needs rather than hype.
-
-## 🤝 Development Journey and AI Assistance
-
-This project was developed with assistance from Claude (Anthropic's AI), which played a significant role in accelerating learning and solving complex problems.
-
-### Complex Implementation Challenges
-
-**Dynamic Form Handling with HTMX**
-The exercise rows feature required understanding how WTForms FieldList works with HTMX. Claude explained how to properly name form fields for server-side validation and manage TomSelect reinitialization after HTMX swaps DOM elements.
-
-**Database Migrations**
-When adding time-based exercise support, Claude helped design the migration strategy with nullable `reps`, XOR constraints, and defensive migration code that checks for existing constraints before dropping them.
-
-### 💻 JavaScript Implementation
-Unlike the Python backend where I consulted Claude but worked through understanding each piece myself, **I largely delegated JavaScript implementation to Claude**. The `session-form.js`, `ex-history.js`, and `table-row-link.js` files were mostly AI-generated. However, I made sure to review and understand post-factum how TomSelect initialization works, why HTMX event listeners (`htmx:afterSwap`, `htmx:afterSettle`) are needed, and how the event delegation pattern functions. This taught me practical JavaScript patterns even though I didn't write the code myself initially.
-
-### Code Review and Best Practices
-Claude reviewed code for SQL injection prevention, N+1 query problems (using `selectinload`), resource cleanup, and input validation edge cases.
-
-### Learning Approach
-I used Claude as a **senior developer mentor** rather than a code generator:
-1. Attempt implementation myself first
-2. Ask Claude to review and explain issues
-3. Understand the *why* before applying fixes
-4. Ask follow-up questions until concepts are clear
-5. Apply learned patterns to new features independently
-
-This approach meant slower initial development but deeper understanding. By the end, I was implementing new features with minimal assistance because I understood the underlying patterns.
-
-### 💡 Key Insight
-**AI accelerates learning but doesn't replace understanding.** 
-The most significant challenge I faced was implementing the backend for the dynamic exercise form. After days of brainstorming and documentation review, I developed a solution independently. This experience significantly boosted my confidence and shaped my current perspective on how I see my role in the development workflow.
-
-## 🎯 Challenges and Learning Points
-
-### Post-CS50 Onboarding
-Leaving the comfortable CS50 ecosystem was initially overwhelming. The abundance of choices—which technologies to use, which deployment platforms to choose—created analysis paralysis. The real world doesn't come with predefined toolchains. The pressure was intense in the early days. Every decision felt high-stakes: Flask vs Django vs FastAPI? SQLAlchemy vs raw SQL? HTMX vs React? These weren't just technical choices—they affected the entire project trajectory.
-
-### SQLAlchemy + Alembic Learning Curve
-Moving from CS50's simple SQLite to production PostgreSQL with ORM and migrations was challenging. Understanding how SQLAlchemy's session management works, why `db.session.flush()` is needed before accessing auto-generated IDs, and how Alembic tracks schema changes required significant mental overhead.
-
-### AI Balance
-CS50's guidance to "treat such tools as amplifying, not supplanting, your productivity" proved crucial. Finding the right balance between using AI for acceleration and ensuring genuine understanding required discipline.
-
-### Scope Creep
-I constantly struggled with feature scope: timezones, multi-currency support, client-side logins, multi-trainer support, payment entities, future-proofing database indexes. Learning to ship MVP features and iterate based on feedback was a valuable lesson.
-
-### When Is It Done?
-There was always "one more feature" before showing it to users. But feedback from actual trainers was invaluable—I should have deployed earlier. Real user input beats perfectionism.
 
 ## 📄 License
 

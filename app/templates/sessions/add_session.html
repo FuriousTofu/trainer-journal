@@ -26,7 +26,7 @@
         <form method="post" action="{{ url_for('.add_session') }}" novalidate class="add-form" id="add-session-form">
             {{ form.hidden_tag() }}
             <div class="row g-2 mb-2">
-                <div class="col-6">
+                <div class="col-8">
                     <div class="form-floating">
                         {{ form.client(
                             class="form-select",
@@ -34,42 +34,6 @@
                         ) }}
                         {{ form.client.label(class="form-label") }}
                         {% for error in form.client.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="form-floating">
-                        {{ form.start_dt(
-                            class="form-control",
-                            type="datetime-local",
-                            placeholder="Start Date and Time"
-                        ) }}
-                        {{ form.start_dt.label(class="form-label") }}
-                        {% for error in form.start_dt.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            <div class="row g-2 mb-2">
-                <div class="col-4">
-                    <div class="form-floating">
-                        {{ form.duration_min(class="form-control", placeholder="Duration (minutes)") }}
-                        {{ form.duration_min.label(class="form-label") }}
-                        {% for error in form.duration_min.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="form-floating">
-                        {{ form.mode(
-                            class="form-select",
-                            placeholder="Session Mode"
-                        ) }}
-                        {{ form.mode.label(class="form-label") }}
-                        {% for error in form.mode.errors %}
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -86,6 +50,39 @@
                     </div>
                 </div>
             </div>
+            <div class="row g-2 mb-2">
+                <div class="col-8">
+                    <div class="form-floating">
+                        {{ form.start_dt(
+                            class="form-control",
+                            type="datetime-local",
+                            placeholder="Start Date and Time"
+                        ) }}
+                        {{ form.start_dt.label(class="form-label") }}
+                        {% for error in form.start_dt.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-floating">
+                        {{ form.duration_min(class="form-control", placeholder="Duration (minutes)") }}
+                        {{ form.duration_min.label(class="form-label") }}
+                        {% for error in form.duration_min.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% if all_tags %}
+            <div class="mb-2">
+                <select id="input-tags" name="tags" multiple placeholder="Select tags...">
+                    {% for tag in all_tags %}
+                        <option value="{{ tag.id }}" data-color="{{ tag.color }}">{{ tag.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
             <div id="exercise-wrapper">
                 {% for subform in form.exercises %}
                     {% include "helpers/_exercise_row.html" with context %}
@@ -125,9 +122,6 @@
                 <script>window.EXERCISE_TYPES = {{ exercise_types | tojson }};</script>
                 <script src="{{ url_for('static', filename='js/ex-history.js') }}"></script>
                 <script src="{{ url_for('static', filename='js/session-form.js') }}"></script>
-                {% if is_copy %}
-                <script src="{{ url_for('static', filename='js/ex-init-trigger.js') }}"></script>
-                {% endif %}
             {% endblock %}
     {% endif %}
 {% endblock %}

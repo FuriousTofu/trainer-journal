@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros/badges.html" import paid_badge, mode_badge, session_status_badge %}
+{% from "macros/session_table.html" import session_table %}
 
 {% block title %}Sessions{% endblock %}
 
@@ -15,42 +15,12 @@
             <div class="card shadow-sm border-0 text-center p-4" style="width: 300px;">
                 <i class="bi bi-info-circle fs-1 mb-2"></i>
                 <div>You have no sessions yet.<br>Please add some to activate this view.</div>
-            </div>  
-        </div>   
+            </div>
+        </div>
     {% else %}
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th class="text-start">Start</th>
-                    <th class="text-start">Client</th>
-                    <th class="text-start">Mode</th>
-                    <th class="text-start">Status</th>
-                    <th class="text-start">Payment</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for session in sessions %}
-                    <tr
-                        class="table-row-link"
-                        data-url="{{ url_for('.session', session_public_id=session.public_id) }}">
-                        <td class="text-start">
-                            {{ session.start_dt|dt_no_seconds }}
-                        </td>
-                        <td class="text-start">{{ session.client.name }}</td>
-                        <td class="text-start">
-                            {{ mode_badge(session.mode) }}
-                        </td>
-                        <td class="text-start">
-                            {{ session_status_badge(session.status) }}</td>
-                        <td class="text-start">
-                            {{ paid_badge(session.is_paid) }}
-                        </td>
-                    </tr>
-                {% endfor %}
-                {% block scripts %}
-                    <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
-                {% endblock %}
-            </tbody>
-        </table>
+        {{ session_table(sessions, show_client=True) }}
+        {% block scripts %}
+            <script src="{{ url_for('static', filename='js/table-row-link.js') }}"></script>
+        {% endblock %}
     {% endif %}
 {% endblock%}

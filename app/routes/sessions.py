@@ -13,6 +13,7 @@ from app import db
 from app.models import (
     Client, Session,
     Exercise, SessionExercise,
+    Tag, SessionTag,
 )
 from app.forms import (
     AddSessionForm, SessionExercisesHelperForm,
@@ -32,6 +33,9 @@ def sessions():
             Client.trainer_id == current_user.id,
             Client.archived_at.is_(None)
         )
+        .options(
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
+        )
         .order_by(Session.start_dt.desc())
     )
     sessions = db.session.execute(stmt).scalars().all()
@@ -47,7 +51,8 @@ def session(session_public_id):
         )
         .options(
             selectinload(Session.client),
-            selectinload(Session.session_exercises).selectinload(SessionExercise.exercise)
+            selectinload(Session.session_exercises).selectinload(SessionExercise.exercise),
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
         )
     )
     session_obj = db.session.execute(stmt).scalars().first()
@@ -60,6 +65,10 @@ def session(session_public_id):
         abort(403)
 
     exercise_choices, exercise_types = _exercise_choices(current_user.id)
+
+    all_tags = db.session.execute(
+        select(Tag).where(Tag.trainer_id == current_user.id).order_by(Tag.name)
+    ).scalars().all()
 
     if request.method == "POST":
         header_form = EditSessionForm(formdata=request.form, obj=session_obj)
@@ -120,6 +129,18 @@ def session(session_public_id):
                         weight=weight,
                     )
                     db.session.add(se)
+
+                # Update session tags
+                db.session.query(SessionTag).filter_by(
+                    session_id=session_obj.id
+                ).delete()
+                tag_ids = request.form.getlist("tags", type=int)[:4]
+                for tag_id in tag_ids:
+                    db.session.add(SessionTag(
+                        session_id=session_obj.id,
+                        tag_id=tag_id,
+                    ))
+
                 db.session.commit()
                 flash("Session updated successfully", "success")
                 return redirect(
@@ -135,6 +156,7 @@ def session(session_public_id):
                     form=header_form,
                     exercises_form=exercises_form,
                     exercise_types=exercise_types,
+                    all_tags=all_tags,
                 )
         else:
             flash("Please correct the errors below.", "danger")
@@ -145,6 +167,76 @@ def session(session_public_id):
         form=header_form,
         exercises_form=exercises_form,
         exercise_types=exercise_types,
+        all_tags=all_tags,
+    )
+
+
+@bp.route("/sessions/<string:session_public_id>/toggle-status", methods=["POST"])
+@login_required
+def toggle_status(session_public_id):
+    if not request.headers.get("HX-Request"):
+        abort(404)
+
+    stmt = (
+        select(Session)
+        .where(
+            Session.public_id == session_public_id,
+            Session.client.has(trainer_id=current_user.id)
+        )
+        .options(
+            selectinload(Session.client),
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
+        )
+    )
+    session_obj = db.session.execute(stmt).scalars().first()
+
+    if not session_obj:
+        abort(404)
+
+    if session_obj.status == "planned":
+        session_obj.status = "done"
+    elif session_obj.status == "done":
+        session_obj.status = "planned"
+    else:
+        abort(400)
+
+    db.session.commit()
+
+    show_client = request.args.get("show_client", "0") == "1"
+    return render_template(
+        "helpers/_session_row.html",
+        session=session_obj,
+        show_client=show_client,
+    )
+
+
+@bp.route("/sessions/<string:session_public_id>/toggle-paid", methods=["POST"])
+@login_required
+def toggle_paid(session_public_id):
+    if not request.headers.get("HX-Request"):
+        abort(404)
+
+    stmt = select(Session).where(
+        Session.public_id == session_public_id,
+        Session.client.has(trainer_id=current_user.id)
+    )
+    session_obj = db.session.execute(stmt).scalars().first()
+
+    if not session_obj:
+        abort(404)
+
+    session_obj.is_paid = not session_obj.is_paid
+    if session_obj.is_paid:
+        session_obj.payment_date = datetime.now(timezone.utc)
+    else:
+        session_obj.payment_date = None
+
+    db.session.commit()
+
+    return render_template(
+        "helpers/_paid_badge.html",
+        is_paid=session_obj.is_paid,
+        session_public_id=session_obj.public_id,
     )
 
 
@@ -211,6 +303,10 @@ def add_session():
     exercise_choices, exercise_types = _exercise_choices(current_user.id)
     has_exercises = len(exercise_choices) > 1
 
+    all_tags = db.session.execute(
+        select(Tag).where(Tag.trainer_id == current_user.id).order_by(Tag.name)
+    ).scalars().all()
+
     # Handle copy from existing session
     if request.method == "GET" and copy_from:
         original = db.session.execute(
@@ -230,7 +326,6 @@ def add_session():
             if client and not client.archived_at:
                 form.client.data = original.client_id
                 form.duration_min.data = original.duration_min
-                form.mode.data = original.mode
                 form.price.data = original.price
 
                 # Copy exercises
@@ -271,7 +366,6 @@ def add_session():
                 client_id=form.client.data,
                 start_dt=_local_to_utc(form.start_dt.data),
                 duration_min=form.duration_min.data,
-                mode=form.mode.data,
                 price=form.price.data,
                 notes=form.notes.data.strip()
                 if form.notes.data
@@ -298,6 +392,14 @@ def add_session():
                     weight=weight,
                 )
                 db.session.add(se)
+
+            # Save session tags
+            tag_ids = request.form.getlist("tags", type=int)[:4]
+            for tag_id in tag_ids:
+                db.session.add(SessionTag(
+                    session_id=s.id,
+                    tag_id=tag_id,
+                ))
 
             db.session.commit()
             flash("Session added successfully", "success")
@@ -330,6 +432,7 @@ def add_session():
         has_exercises=has_exercises,
         is_copy=bool(copy_from),
         exercise_types=exercise_types,
+        all_tags=all_tags,
     )
 
 

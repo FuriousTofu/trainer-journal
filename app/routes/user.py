@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from flask import render_template, redirect, url_for, flash
 from flask_login import (
     login_user, logout_user,
@@ -8,9 +10,11 @@ from werkzeug.security import (
 )
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
+from zoneinfo import ZoneInfo
 
 from app import db
-from app.models import Trainer
+from app.models import Trainer, Client, Session, SessionTag
 from app.forms import RegisterForm, LoginForm
 
 from . import bp
@@ -19,7 +23,47 @@ from . import bp
 @bp.route("/")
 @login_required
 def index():
-    return render_template("user/main.html")
+    tz = ZoneInfo(current_user.timezone or "Europe/Kyiv")
+    today_start = datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    stmt = (
+        select(Session)
+        .join(Session.client)
+        .where(
+            Client.trainer_id == current_user.id,
+            Client.archived_at.is_(None),
+            Session.start_dt >= today_start,
+            Session.start_dt < today_end,
+        )
+        .options(
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
+        )
+        .order_by(Session.start_dt)
+    )
+    today_sessions = db.session.execute(stmt).scalars().all()
+
+    unpaid_stmt = (
+        select(Session)
+        .join(Session.client)
+        .where(
+            Client.trainer_id == current_user.id,
+            Client.archived_at.is_(None),
+            Session.status.in_(("done", "no_show")),
+            Session.is_paid == False,
+        )
+        .options(
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
+        )
+        .order_by(Session.start_dt.desc())
+    )
+    unpaid_sessions = db.session.execute(unpaid_stmt).scalars().all()
+
+    return render_template(
+        "user/main.html",
+        today_sessions=today_sessions,
+        unpaid_sessions=unpaid_sessions,
+    )
 
 
 @bp.route("/login", methods=["GET", "POST"])

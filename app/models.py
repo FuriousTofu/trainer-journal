@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime,
     Enum, ForeignKey, Boolean, CheckConstraint,
@@ -62,6 +64,12 @@ class Trainer(db.Model, UserMixin):
         passive_deletes=True
     )
 
+    tags = relationship(
+        "Tag",
+        back_populates="trainer",
+        cascade="all",
+        passive_deletes=True
+    )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -138,13 +146,6 @@ class Session(db.Model):
     )
     start_dt = Column(DateTime(timezone=True), nullable=False, index=True)
     duration_min = Column(Integer, nullable=False, default=60, server_default="60")
-    mode = Column(
-        Enum("online", "offline", name="session_format"),
-        nullable=False,
-        default="offline",
-        server_default="offline"
-    )
-
     # no_show - trainer has the right to charge a fee.
     status = Column(
         Enum("planned", "done", "cancelled", "no_show", name="session_status"),
@@ -175,6 +176,18 @@ class Session(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True
     )
+    session_tags = relationship(
+        "SessionTag",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+
+    @property
+    def is_overdue(self):
+        from datetime import timedelta
+        end_dt = self.start_dt + timedelta(minutes=self.duration_min)
+        return self.status == "planned" and end_dt < datetime.now(timezone.utc)
 
 class Exercise(db.Model):
     """Represents an exercise - reusable, can be linked to multiple sessions."""
@@ -260,3 +273,56 @@ class SessionExercise(db.Model):
 
     session = relationship("Session", back_populates="session_exercises")
     exercise = relationship("Exercise", back_populates="session_exercises")
+
+
+class Tag(db.Model):
+    """Represents a tag to label sessions - reusable, can be linked to multiple sessions."""
+
+    __tablename__ = "tags"
+    id = Column(Integer, primary_key=True)
+    trainer_id = Column(
+        Integer,
+        ForeignKey("trainers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    name = Column(String(20), nullable=False)
+    color = Column(
+        String(7),
+        nullable=False,
+        default="#6B7280",
+        server_default="#6B7280"
+    )
+
+    session_tags = relationship(
+        "SessionTag",
+        back_populates="tag",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+    trainer = relationship("Trainer", back_populates="tags")
+
+    __table_args__ = (
+        UniqueConstraint('trainer_id', 'name', name='uq_tag_name_per_trainer'),
+    )
+
+
+class SessionTag(db.Model):
+    """Links a tag to a specific session (many-to-many)."""
+
+    __tablename__ = "session_tags"
+    session_id = Column(
+        Integer,
+        ForeignKey("sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True
+    )
+    tag_id = Column(
+        Integer,
+        ForeignKey("tags.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True
+    )
+
+    session = relationship("Session", back_populates="session_tags")
+    tag = relationship("Tag", back_populates="session_tags")
