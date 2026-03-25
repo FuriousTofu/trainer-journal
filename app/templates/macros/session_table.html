@@ -1,0 +1,60 @@
+{% from "macros/badges.html" import paid_badge, session_status_badge %}
+
+{% macro session_table(sessions, show_client=False) %}
+<table class="table table-hover">
+    <colgroup>
+        <col style="width: 5%">
+        <col style="width: 20%">
+        {% if show_client %}
+            <col style="width: 20%">
+        {% endif %}
+        <col style="width: 50%">
+        <col style="width: 5%">
+    </colgroup>
+    <thead>
+        <tr>
+            <th></th>
+            <th class="text-start">Start</th>
+            {% if show_client %}
+                <th class="text-start">Client</th>
+            {% endif %}
+            <th class="text-start">Tags</th>
+            <th class="text-start"><i class="bi bi-piggy-bank fs-4"></i></th>
+        </tr>
+    </thead>
+    <tbody class="align-middle">
+        {% for session in sessions %}
+            <tr
+                class="table-row-link
+                {% if session.status in ('done') %}
+                    session-done
+                {% endif %}
+                {% if session.status == 'cancelled' %}
+                    session-cancelled
+                {% endif %}
+                {% if session.status == 'no_show' %}
+                    session-no_show
+                {% endif %}"
+                data-url="{{ url_for('.session', session_public_id=session.public_id) }}">
+                <td class="text-center color" style="width: 1%; white-space: nowrap; padding-right: 0;">
+                    {{ session_status_badge(session.status, session.public_id, show_client) }}
+                </td>
+                <td class="text-start color{% if session.is_overdue %} session-overdue{% endif %}">
+                    {{ session.start_dt|dt_no_seconds }}
+                </td>
+                {% if show_client %}
+                    <td class="text-start">{{ session.client.name }}</td>
+                {% endif %}
+                <td class="text-start">
+                    {% for st in session.session_tags %}
+                        <span class="badge tag-badge" style="--tag-color: {{ st.tag.color }}">{{ st.tag.name }}</span>
+                    {% endfor %}
+                </td>
+                <td class="text-start">
+                    {{ paid_badge(session.is_paid, session.public_id) }}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}

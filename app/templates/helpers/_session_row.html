@@ -1,0 +1,31 @@
+{% from "macros/badges.html" import paid_badge, session_status_badge %}
+<tr
+    class="table-row-link
+    {% if session.status in ('done') %}
+        session-done
+    {% endif %}
+    {% if session.status == 'cancelled' %}
+        session-cancelled
+    {% endif %}
+    {% if session.status == 'no_show' %}
+        session-no_show
+    {% endif %}"
+    data-url="{{ url_for('main.session', session_public_id=session.public_id) }}">
+    <td class="text-center color" style="width: 1%; white-space: nowrap; padding-right: 0;">
+        {{ session_status_badge(session.status, session.public_id, show_client) }}
+    </td>
+    <td class="text-start color{% if session.is_overdue %} session-overdue{% endif %}">
+        {{ session.start_dt|dt_no_seconds }}
+    </td>
+    {% if show_client %}
+        <td class="text-start">{{ session.client.name }}</td>
+    {% endif %}
+    <td class="text-start">
+        {% for st in session.session_tags %}
+            <span class="badge tag-badge" style="--tag-color: {{ st.tag.color }}">{{ st.tag.name }}</span>
+        {% endfor %}
+    </td>
+    <td class="text-start">
+        {{ paid_badge(session.is_paid, session.public_id) }}
+    </td>
+</tr>
