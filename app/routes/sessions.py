@@ -134,7 +134,7 @@ def session(session_public_id):
                 db.session.query(SessionTag).filter_by(
                     session_id=session_obj.id
                 ).delete()
-                tag_ids = request.form.getlist("tags", type=int)
+                tag_ids = request.form.getlist("tags", type=int)[:4]
                 for tag_id in tag_ids:
                     db.session.add(SessionTag(
                         session_id=session_obj.id,
@@ -168,6 +168,75 @@ def session(session_public_id):
         exercises_form=exercises_form,
         exercise_types=exercise_types,
         all_tags=all_tags,
+    )
+
+
+@bp.route("/sessions/<string:session_public_id>/toggle-status", methods=["POST"])
+@login_required
+def toggle_status(session_public_id):
+    if not request.headers.get("HX-Request"):
+        abort(404)
+
+    stmt = (
+        select(Session)
+        .where(
+            Session.public_id == session_public_id,
+            Session.client.has(trainer_id=current_user.id)
+        )
+        .options(
+            selectinload(Session.client),
+            selectinload(Session.session_tags).selectinload(SessionTag.tag)
+        )
+    )
+    session_obj = db.session.execute(stmt).scalars().first()
+
+    if not session_obj:
+        abort(404)
+
+    if session_obj.status == "planned":
+        session_obj.status = "done"
+    elif session_obj.status == "done":
+        session_obj.status = "planned"
+    else:
+        abort(400)
+
+    db.session.commit()
+
+    show_client = request.args.get("show_client", "0") == "1"
+    return render_template(
+        "helpers/_session_row.html",
+        session=session_obj,
+        show_client=show_client,
+    )
+
+
+@bp.route("/sessions/<string:session_public_id>/toggle-paid", methods=["POST"])
+@login_required
+def toggle_paid(session_public_id):
+    if not request.headers.get("HX-Request"):
+        abort(404)
+
+    stmt = select(Session).where(
+        Session.public_id == session_public_id,
+        Session.client.has(trainer_id=current_user.id)
+    )
+    session_obj = db.session.execute(stmt).scalars().first()
+
+    if not session_obj:
+        abort(404)
+
+    session_obj.is_paid = not session_obj.is_paid
+    if session_obj.is_paid:
+        session_obj.payment_date = datetime.now(timezone.utc)
+    else:
+        session_obj.payment_date = None
+
+    db.session.commit()
+
+    return render_template(
+        "helpers/_paid_badge.html",
+        is_paid=session_obj.is_paid,
+        session_public_id=session_obj.public_id,
     )
 
 
@@ -325,7 +394,7 @@ def add_session():
                 db.session.add(se)
 
             # Save session tags
-            tag_ids = request.form.getlist("tags", type=int)
+            tag_ids = request.form.getlist("tags", type=int)[:4]
             for tag_id in tag_ids:
                 db.session.add(SessionTag(
                     session_id=s.id,
