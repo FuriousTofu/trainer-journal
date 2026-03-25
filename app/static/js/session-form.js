@@ -56,6 +56,7 @@
 
         new TomSelect(el, {
             plugins: ["remove_button"],
+            maxItems: 4,
             placeholder: "Select tags...",
             render: {
                 option: function(data, escape) {
@@ -86,7 +87,20 @@
     document.addEventListener("DOMContentLoaded", () => {
         initExerciseSelects();
         initTagSelect();
+        // Delay to ensure TomSelect has synced values to the underlying selects
+        setTimeout(triggerExerciseHistoryRefresh, 100);
     });
+
+    function triggerExerciseHistoryRefresh() {
+        document
+            .querySelectorAll('select[name^="exercises-"][name$="-exercise"]')
+            .forEach(function (sel) {
+                var value = sel.tomselect ? sel.tomselect.getValue() : sel.value;
+                if (value && value !== "0" && value !== "") {
+                    htmx.trigger(sel, "change");
+                }
+            });
+    }
 
     document.body.addEventListener("click", (event) => {
         const addBtn = event.target.closest(".js-add-exercise");
@@ -105,6 +119,7 @@
             document.body.addEventListener("htmx:afterSettle", function handleRemove(e) {
                 if (e.detail.target.id === "exercise-wrapper") {
                     initExerciseSelects(e.detail.target);
+                    triggerExerciseHistoryRefresh();
                     document.body.removeEventListener("htmx:afterSettle", handleRemove);
                 }
             });
