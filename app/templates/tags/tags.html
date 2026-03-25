@@ -24,8 +24,8 @@
                     href="{{ url_for('.tag', tag_id=tag.id) }}"
                     class="text-decoration-none text-body"
                 >
-                    <div style="background-color: {{ tag.color }}" class="card shadow-sm border-0 text-center p-3">
-                        <span style="color: white; font-weight: bold;">
+                    <div style="--tag-color: {{ tag.color }}" class="card tag-card shadow-sm border-0 text-center p-3">
+                        <span style="font-weight: bold;">
                             {{ tag.name }}
                         </span>
                     </div>
