@@ -10,16 +10,10 @@ from app.forms import AddExerciseForm, EditExerciseForm
 from . import bp
 
 
-@bp.route("/exercises", methods=["GET", "POST"])
+@bp.route("/exercises", methods=["GET"])
 @login_required
 def exercises():
-    stmt = select(Exercise).where(
-        Exercise.trainer_id == current_user.id,
-        Exercise.is_active.is_(True)
-    ).order_by(Exercise.name)
-    exercises = db.session.execute(stmt).scalars().all()
-
-    return render_template("exercises/exercises.html", exercises=exercises)
+    return redirect(url_for(".references", tab="exercises"))
 
 
 @bp.route("/exercises/archived", methods=["GET"])
