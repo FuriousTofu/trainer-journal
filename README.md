@@ -6,6 +6,11 @@ TrainerJournal is a comprehensive web application designed for personal fitness 
 
 ## 🔔 Updates
 
+#### 29/03/2026 v 0.1.2:
+- **References page**: exercises and tags consolidated into a single tabbed page, replacing two separate navigation entries
+- **Drag-and-drop exercise ordering**: exercises within a session can now be reordered by dragging — order is preserved on save without any backend changes (SortableJS + client-side index renumbering)
+- **Fix**: tags were incorrectly duplicated when copying a session
+
 #### 25/03/2026 v 0.1.1:
 - **Tag system**: create, edit, and delete custom color-coded tags to label sessions (up to 4 per session)
 - **Home dashboard**: today's sessions and unpaid sessions overview on the main page
