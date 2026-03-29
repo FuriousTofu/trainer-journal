@@ -13,12 +13,7 @@ from . import bp
 @bp.route("/tags", methods=["GET"])
 @login_required
 def tags():
-    stmt = select(Tag).where(
-        Tag.trainer_id == current_user.id
-    ).order_by(Tag.name)
-    tags = db.session.execute(stmt).scalars().all()
-
-    return render_template("tags/tags.html", tags=tags)
+    return redirect(url_for(".references", tab="tags"))
 
 
 @bp.route("/tags/add", methods=["GET", "POST"])

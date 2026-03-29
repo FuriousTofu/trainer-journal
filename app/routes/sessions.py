@@ -307,6 +307,8 @@ def add_session():
         select(Tag).where(Tag.trainer_id == current_user.id).order_by(Tag.name)
     ).scalars().all()
 
+    copied_tag_ids = set()
+
     # Handle copy from existing session
     if request.method == "GET" and copy_from:
         original = db.session.execute(
@@ -316,7 +318,8 @@ def add_session():
                 Session.client.has(trainer_id=current_user.id)
             )
             .options(
-                selectinload(Session.session_exercises)
+                selectinload(Session.session_exercises),
+                selectinload(Session.session_tags),
             )
         ).scalars().first()
 
@@ -327,6 +330,9 @@ def add_session():
                 form.client.data = original.client_id
                 form.duration_min.data = original.duration_min
                 form.price.data = original.price
+
+                # Copy tags
+                copied_tag_ids = {st.tag_id for st in original.session_tags}
 
                 # Copy exercises
                 for se in original.session_exercises:
@@ -431,6 +437,7 @@ def add_session():
         has_clients=has_clients,
         has_exercises=has_exercises,
         is_copy=bool(copy_from),
+        copied_tag_ids=copied_tag_ids,
         exercise_types=exercise_types,
         all_tags=all_tags,
     )

@@ -26,6 +26,7 @@ limiter = Limiter(
 
 def create_app(config_class=None):
     app = Flask(__name__)
+    app.url_map.strict_slashes = False
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     if config_class is None:

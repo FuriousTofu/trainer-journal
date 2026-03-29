@@ -78,7 +78,9 @@
             <div class="mb-2">
                 <select id="input-tags" name="tags" multiple placeholder="Select tags...">
                     {% for tag in all_tags %}
-                        <option value="{{ tag.id }}" data-color="{{ tag.color }}">{{ tag.name }}</option>
+                        <option value="{{ tag.id }}" data-color="{{ tag.color }}"
+                            {% if tag.id in copied_tag_ids %}selected{% endif %}
+                        >{{ tag.name }}</option>
                     {% endfor %}
                 </select>
             </div>

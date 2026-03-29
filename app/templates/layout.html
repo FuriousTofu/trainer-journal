@@ -5,7 +5,7 @@
     <head>
 
         <meta charset="utf-8">
-        <meta name="viewport" content="initial-scale=1, width=device-width">
+        <meta name="viewport" content="initial-scale=1, width=device-width, user-scalable=no, maximum-scale=1, viewport-fit=cover">
 
         <link   href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
                 rel="stylesheet" 
@@ -31,8 +31,7 @@
         {% set nav_items = [
             {'url': url_for('.sessions'), 'path': '/sessions', 'icon': 'bi-journal-bookmark-fill', 'title': 'Sessions'},
             {'url': url_for('.clients'), 'path': '/clients', 'icon': 'bi-people-fill', 'title': 'Clients'},
-            {'url': url_for('.exercises'), 'path': '/exercises', 'icon': 'bi-heart-pulse-fill', 'title': 'Exercises'},
-            {'url': url_for('.tags'), 'path': '/tags', 'icon': 'bi bi-tags-fill', 'title': 'Tags'}
+            {'url': url_for('.references'), 'path': '/references', 'icon': 'bi-book', 'title': 'References'}
         ] %}
         {% if get_flashed_messages() %}
             <header>
@@ -93,12 +92,18 @@
         </div>
 
         <!-- Mobile bottom navigation -->
-        <nav class="d-md-none fixed-bottom bg-body-tertiary border-top mobile-bottom-nav">
+        <nav
+            style="padding-bottom: env(safe-area-inset-bottom);" 
+            class="d-md-none fixed-bottom bg-body-tertiary border-top mobile-bottom-nav">
             <div class="d-flex justify-content-around align-items-center py-2">
+                <a  href="/"
+                    class="nav-link text-center px-3">
+                    <i class="bi bi-leaf-fill fs-2 {% if request.path == '/' %}text-success{% else %}text-body-secondary{% endif %}" style="font-size:1.5rem;"></i>
+                </a>
                 {% for item in nav_items %}
                 <a href="{{ item.url }}"
                    class="nav-link text-center px-3 {% if item.path in request.path %}text-primary{% else %}text-body-secondary{% endif %}">
-                    <i class="bi {{ item.icon }}" style="font-size:1.5rem;"></i>
+                    <i class="bi {{ item.icon }} fs-2" style="font-size:1.5rem;"></i>
                 </a>
                 {% endfor %}
                 <div class="dropdown dropup">
@@ -124,6 +129,7 @@
         </script>
         <script src="{{ url_for('static', filename='js/htmx.min.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
         <script src="{{ url_for('static', filename='js/main.js') }}"></script>
         {% block scripts %}{% endblock %}
     </body>

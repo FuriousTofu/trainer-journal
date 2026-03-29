@@ -83,10 +83,98 @@
         });
     }
 
+    // ── Drag-and-drop reordering ──────────────────────────────────────────
+
+    function renumberRows() {
+        var items = Array.from(
+            document.querySelectorAll("#exercise-wrapper .exercise-item")
+        );
+
+        // Snapshot state before any mutation
+        var plan = items.map(function(item, newIndex) {
+            var row = item.querySelector(".exercise-row");
+            var oldIndex = row.dataset.index;
+            return {
+                row: row,
+                oldIndex: oldIndex,
+                newIndex: String(newIndex),
+                histDiv: item.querySelector("[id^='ex-history-']"),
+            };
+        });
+
+        if (plan.every(function(p) { return p.oldIndex === p.newIndex; })) return;
+
+        // Step 1: strip all history IDs to prevent conflicts during rename
+        plan.forEach(function(p) {
+            if (p.histDiv) p.histDiv.removeAttribute("id");
+        });
+
+        // Step 2: rename inputs/attrs and update HTMX bindings
+        plan.forEach(function(p) {
+            if (p.oldIndex === p.newIndex) return;
+
+            p.row.querySelectorAll("[name^='exercises-']").forEach(function(el) {
+                el.name = el.name.replace(
+                    /^exercises-\d+-/,
+                    "exercises-" + p.newIndex + "-"
+                );
+            });
+            p.row.querySelectorAll("[id^='exercises-']").forEach(function(el) {
+                el.id = el.id.replace(
+                    /^exercises-\d+-/,
+                    "exercises-" + p.newIndex + "-"
+                );
+            });
+            p.row.querySelectorAll("[for^='exercises-']").forEach(function(el) {
+                el.htmlFor = el.htmlFor.replace(
+                    /^exercises-\d+-/,
+                    "exercises-" + p.newIndex + "-"
+                );
+            });
+
+            var sel = p.row.querySelector("[hx-target^='#ex-history-']");
+            if (sel) {
+                sel.setAttribute("hx-target", "#ex-history-" + p.newIndex);
+                sel.setAttribute("hx-vals", '{"row_index": "' + p.newIndex + '"}');
+            }
+
+            var btn = p.row.querySelector(".js-remove-exercise");
+            if (btn) {
+                var v = JSON.parse(btn.getAttribute("hx-vals"));
+                v.remove_index = p.newIndex;
+                btn.setAttribute("hx-vals", JSON.stringify(v));
+            }
+
+            p.row.dataset.index = p.newIndex;
+        });
+
+        // Step 3: restore history IDs with correct new indices
+        plan.forEach(function(p) {
+            if (p.histDiv) p.histDiv.id = "ex-history-" + p.newIndex;
+        });
+    }
+
+    function initSortable() {
+        var wrapper = document.getElementById("exercise-wrapper");
+        if (!wrapper) return;
+        if (wrapper._sortable) {
+            wrapper._sortable.destroy();
+        }
+        wrapper._sortable = new Sortable(wrapper, {
+            handle: ".drag-handle",
+            draggable: ".exercise-item",
+            animation: 150,
+            onEnd: renumberRows,
+        });
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+
     // Initial page load
     document.addEventListener("DOMContentLoaded", () => {
         initExerciseSelects();
         initTagSelect();
+        initSortable();
         // Delay to ensure TomSelect has synced values to the underlying selects
         setTimeout(triggerExerciseHistoryRefresh, 100);
     });
@@ -110,6 +198,7 @@
             document.body.addEventListener("htmx:afterSwap", function handleAdd(e) {
                 if (e.detail.target.id === "exercise-wrapper") {
                     initExerciseSelects(e.detail.target);
+                    initSortable();
                     document.body.removeEventListener("htmx:afterSwap", handleAdd);
                 }
             });
@@ -119,6 +208,7 @@
             document.body.addEventListener("htmx:afterSettle", function handleRemove(e) {
                 if (e.detail.target.id === "exercise-wrapper") {
                     initExerciseSelects(e.detail.target);
+                    initSortable();
                     triggerExerciseHistoryRefresh();
                     document.body.removeEventListener("htmx:afterSettle", handleRemove);
                 }
