@@ -125,10 +125,14 @@ body {
   box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
 }
 
+.form-label {
+  font-size: 0.75rem;
+}
+
 /* Mobile bottom navigation */
 @media (max-width: 767.98px) {
   .pb-mobile {
-    padding-bottom: 5rem !important;
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom)) !important;
   }
 
   .mobile-bottom-nav {

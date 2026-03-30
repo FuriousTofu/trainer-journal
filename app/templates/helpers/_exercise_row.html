@@ -3,12 +3,12 @@
 {% set ex_type = exercise_types.get(subform.exercise.data | string, 'reps') if exercise_types is defined else 'reps' %}
 <div class="exercise-item">
 <div class="row g-2 mb-2 flex-nowrap exercise-row" data-index="{{ index }}">
-    <div class="col-auto d-flex align-items-center pe-0">
+    <div class="col-auto d-none d-md-flex align-items-center pe-0">
         <span class="drag-handle text-secondary" style="cursor:grab; touch-action:none;">
             <i class="bi bi-grip-vertical fs-5"></i>
         </span>
     </div>
-    <div class="col">
+    <div class="col-4">
         <div>
             {{ subform.exercise(**{
                 "class": "js-exercise-select",
@@ -60,7 +60,7 @@
             {% endfor %}
         </div>
     </div>
-    <div class="col-3">
+    <div class="col">
         <div class="form-floating">
             {{ subform.weight(
                 class="form-control",
@@ -72,7 +72,7 @@
             {% endfor %}
         </div>
     </div>
-    <div class="col-auto d-flex align-items-center justify-content-center">
+    <div class="col-auto d-flex align-items-center justify-content-center ps-0">
         <button
         type="button"
         class="btn btn-link text-primary p-0 js-remove-exercise"
@@ -84,7 +84,7 @@
             "mode": "{{ mode }}"
         }'
         hx-swap="innerHTML">
-        <i class="bi bi-x-lg"></i>
+        <i class="bi bi-x"></i>
         </button>
     </div>
 </div>
