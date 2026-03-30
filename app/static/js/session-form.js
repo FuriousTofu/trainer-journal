@@ -160,12 +160,19 @@
         if (wrapper._sortable) {
             wrapper._sortable.destroy();
         }
+        var isTouch = navigator.maxTouchPoints > 0;
         wrapper._sortable = new Sortable(wrapper, {
-            handle: ".drag-handle",
+            handle: isTouch ? undefined : ".drag-handle",
             draggable: ".exercise-item",
             animation: 150,
+            delay: isTouch ? 400 : 0,
+            delayOnTouchOnly: true,
+            forceFallback: isTouch,
             onEnd: renumberRows,
         });
+        if (isTouch) {
+            wrapper.addEventListener("contextmenu", function(e) { e.preventDefault(); });
+        }
     }
 
     // ── Init ──────────────────────────────────────────────────────────────
